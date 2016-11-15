@@ -15,7 +15,7 @@ var Column = require('./models/Column')
 
 var PropTypes      = require('./PropTypes')
 var Wrapper        = require('./Wrapper')
-var Header         = require('./Header')
+import Header from './HeaderDnd'
 var WrapperFactory = React.createFactory(Wrapper)
 var HeaderFactory  = React.createFactory(Header)
 var ResizeProxy = require('./ResizeProxy')
@@ -370,8 +370,8 @@ module.exports = React.createClass({
             showMenu         : this.showMenu,
             filterMenuFactory : this.filterMenuFactory,
             menuColumn       : state.menuColumn,
-            columnMenuFactory: props.columnMenuFactory
-
+            columnMenuFactory: props.columnMenuFactory,
+            moveCard         : props.moveCard
         })
     },
 

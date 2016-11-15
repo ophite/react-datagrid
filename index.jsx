@@ -2,6 +2,10 @@
 
 require('./index.styl')
 
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import update from 'react/lib/update';
+
 //var Guid = require('node-uuid')
 var sorty = require('sorty')
 var React = require('react')
@@ -10,30 +14,30 @@ var DataGrid = require('./src')
 var faker = window.faker = require('faker');
 var preventDefault = require('./src/utils/preventDefault')
 
-console.log(React.version,' react version');
-var gen = (function(){
+console.log(React.version, ' react version');
+var gen = (function () {
 
     var cache = {}
 
-    return function(len){
+    return function (len) {
 
-        if (cache[len]){
+        if (cache[len]) {
             // return cache[len]
         }
 
         var arr = []
 
-        for (var i = 0; i < len; i++){
+        for (var i = 0; i < len; i++) {
             arr.push({
-                id       : i + 1,
+                id: i + 1,
                 // id: Guid.create(),
-                grade      : Math.round(Math.random() * 10),
-                email    : faker.internet.email(),
+                grade: Math.round(Math.random() * 10),
+                email: faker.internet.email(),
                 firstName: faker.name.firstName(),
-                lastName : faker.name.lastName(),
+                lastName: faker.name.lastName(),
                 birthDate: faker.date.past(),
-                country  : faker.address.country(),
-                city  : faker.address.city()
+                country: faker.address.country(),
+                city: faker.address.city()
             })
         }
 
@@ -46,25 +50,27 @@ var gen = (function(){
 var RELOAD = true
 
 var columns = [
-    { name: 'index', title: '#', width: 50},
-    { name: 'country', width: 200},
+    { name: 'index', title: '#', width: 50 },
+    { name: 'country', width: 200 },
     { name: 'city', width: 150 },
     { name: 'firstName' },
-    { name: 'lastName'  },
+    { name: 'lastName' },
     { name: 'email', width: 200 }
 ]
 
 var ROW_HEIGHT = 31
 var LEN = 2000
-var SORT_INFO = [{name: 'country', dir: 'asc'}]//[ { name: 'id', dir: 'asc'} ]
+var SORT_INFO = [{ name: 'country', dir: 'asc' }]//[ { name: 'id', dir: 'asc'} ]
 var sort = sorty(SORT_INFO)
 var data = gen(LEN);
 
+@DragDropContext(HTML5Backend)
 class App extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.handleSortChange = this.handleSortChange.bind(this);
         this.onColumnResize = this.onColumnResize.bind(this);
+        this.moveCard = this.moveCard.bind(this);
     }
 
     onColumnResize(firstCol, firstSize, secondCol, secondSize) {
@@ -72,17 +78,38 @@ class App extends React.Component {
         this.setState({})
     }
 
+    moveCard = (dragIndex, hoverIndex) => {
+        const handleColumnOrderChange = (index, dropIndex) => {
+            const col = columns[index];
+            columns.splice(index, 1); //delete from index, 1 item
+            columns.splice(dropIndex, 0, col);
+            this.forceUpdate();
+        };
+
+        handleColumnOrderChange(dragIndex, hoverIndex);
+    }
+
     render() {
-        return <DataGrid
-            ref="dataGrid"
-            idProperty='id'
-            dataSource={data}
-            sortInfo={SORT_INFO}
-            onSortChange={this.handleSortChange}
-            columns={columns}
-            style={{height: 400}}
-            onColumnResize={this.onColumnResize}
-        />
+        const divStyle = {
+            height: '100px',
+        };
+
+        return (
+            <div>
+                <div style={divStyle}>drag here</div>
+                <DataGrid
+                    ref="dataGrid"
+                    idProperty='id'
+                    dataSource={data}
+                    sortInfo={SORT_INFO}
+                    onSortChange={this.handleSortChange}
+                    columns={columns}
+                    style={{height: 400}}
+                    moveCard={this.moveCard}
+                    onColumnResize={this.onColumnResize}
+                />
+            </div>
+        )
     }
 
     handleSortChange(sortInfo) {
