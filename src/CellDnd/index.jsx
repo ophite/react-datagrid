@@ -24,7 +24,6 @@ function copyProps(target, source, list) {
 var PropTypes = React.PropTypes
 
 
-
 const style = {
     border: '1px dashed gray',
     padding: '0.5rem 1rem',
@@ -69,7 +68,8 @@ const cardTarget = {
         const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
         // Get vertical middle
-        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 3;
+
 
         // Determine mouse position
         const clientOffset = monitor.getClientOffset();
@@ -93,6 +93,7 @@ const cardTarget = {
 
         // Time to actually perform the action
         // props.handleColumnOrder(dragIndex, hoverIndex);
+        props.handleColumnOrderHover(dragIndex, hoverIndex);
 
         // Note: we're mutating the monitor item here!
         // Generally it's better to avoid mutations,
@@ -103,10 +104,15 @@ const cardTarget = {
 };
 
 
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop()
+    };
+}
 
-@DropTarget("CARD", cardTarget, connect => ({
-    connectDropTarget: connect.dropTarget()
-}))
+@DropTarget("CARD", cardTarget, collect)
 @DragSource("CARD", cardSource, (connect, monitor) => ({
     connectDragSource: connect.dragSource(),
     isDragging: monitor.isDragging()
@@ -174,7 +180,7 @@ class Cell extends React.Component {
     }
 
     render() {
-        const { DndText, isDragging, connectDragSource, connectDropTarget } = this.props;
+        const { isDragging, isOver, connectDragSource, connectDropTarget } = this.props;
         const opacity = isDragging ? 0 : 1;
 
         var props = this.p = this.prepareProps(this.props)
@@ -190,7 +196,9 @@ class Cell extends React.Component {
             style: {
                 padding: props.contentPadding
             }
-        }
+        };
+
+        contentProps.className = !isOver ? contentProps.className : contentProps.className + ' column-drag-hover';
 
         var content = props.renderCell ?
             props.renderCell(contentProps, text, props) :
@@ -200,7 +208,7 @@ class Cell extends React.Component {
         renderProps = {
             ...renderProps,
             opacity
-        }
+        };
         delete renderProps.data
 
         return connectDragSource(connectDropTarget(
@@ -243,10 +251,11 @@ Cell.propTypes = {
     // connectDropTarget: React.PropTypes.func,
     isDragging: React.PropTypes.bool,
     id: React.PropTypes.any,
-    handleColumnOrder: React.PropTypes.func
+    handleColumnOrder: React.PropTypes.func,
+    handleColumnOrderHover: React.PropTypes.func
 };
 
-Cell.defaultProps ={
+Cell.defaultProps = {
     text: '',
 
     firstClassName: 'z-first',
