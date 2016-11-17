@@ -11,7 +11,7 @@ import { DragSource, DropTarget } from 'react-dnd';
 var sorty = require('sorty')
 var React = require('react')
 var ReactDOM = require('react-dom')
-var DataGrid = require('./src')
+var DataGrid = require('./lib')
 var faker = window.faker = require('faker');
 var preventDefault = require('./src/utils/preventDefault')
 
