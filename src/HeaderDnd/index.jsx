@@ -225,7 +225,7 @@ class Header extends React.Component {
         return (
             <Cell
                 key={column.name}
-                moveCard={this.props.moveCard}
+                handleColumnOrder={this.props.handleColumnOrder}
                 contentPadding={props.cellPadding}
                 columns={props.columns || []}
                 index={index}

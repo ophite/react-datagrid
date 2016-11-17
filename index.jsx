@@ -82,7 +82,7 @@ const boxTarget = {
         }
         const dragIndex = tItem.index;
         const hoverIndex = props.index;
-        props.moveCard(dragIndex, hoverIndex);
+        props.handleColumnGrouping(dragIndex, hoverIndex);
     }
 };
 
@@ -96,17 +96,18 @@ class TargetBox extends React.Component {
         connectDropTarget: React.PropTypes.func.isRequired,
         isOver: React.PropTypes.bool.isRequired,
         canDrop: React.PropTypes.bool.isRequired,
-        columns: React.PropTypes.array
+        columns: React.PropTypes.array,
+        handleColumnGrouping: React.PropTypes.func
     };
 
     renderGroupingColumns = () => {
-        if (!this.props.columns.length) {
+        if (!this.props.groupingColumns.length) {
             return null;
         }
 
         return (
             <div>
-                Grouped columns: {this.props.columns.join(', ')}
+                Grouped columns: {this.props.groupingColumns.join(', ')}
             </div>
         );
     };
@@ -135,66 +136,44 @@ class App extends React.Component {
         super(props, context);
         this.handleSortChange = this.handleSortChange.bind(this);
         this.onColumnResize = this.onColumnResize.bind(this);
-        this.moveCard = this.moveCard.bind(this);
+        this.handleColumnGrouping = this.handleColumnGrouping.bind(this);
+        this.handleColumnOrder = this.handleColumnOrder.bind(this);
         this.state = {
             groupingColumns: [
-                {
-                    name: 'country',
-                    activate: true,
-                    date: new Date()
-                },
-                {
-                    name: 'grade',
-                    activate: true,
-                    date: new Date()
-                }
+                'country',
+                'grade',
             ]
         };
     }
 
     _getGroupingColumns() {
-        const columns = [];
+        const items = [];
         this.state.groupingColumns
             .sort(item => item.date)
             .forEach((item, index) => {
                 if (item.activate) {
-                    columns.push(item.name);
+                    items.push(item.name);
                 }
             });
 
-        return columns;
+        console.log('ggg cols: ' + JSON.stringify(this.state.groupingColumns))
+        return items;
     };
 
     handleMenuColumnsGrouping = (menuItem) => {
-        let index = -1;
-        this.state.groupingColumns.forEach((item, indexLocal) => {
-            if (item.name === menuItem) {
-                index = indexLocal;
-            }
-        });
+        let groupingColumns = [...this.state.groupingColumns];
+        const index = groupingColumns.indexOf(menuItem);
 
-        let item = {
-            name: menuItem,
-            activate: true,
-            date: new Date()
-        };
         if (index >= 0) {
-            item = this.state.groupingColumns[index];
-            item.activate = !item.activate;
-
-            this.state.groupingColumns = [
+            groupingColumns = [
                 ...this.state.groupingColumns.slice(0, index),
                 ...this.state.groupingColumns.slice(index + 1, this.state.groupingColumns.length)
             ];
+        } else {
+            groupingColumns.push(menuItem);
         }
 
-        this.setState({
-            ...this.state,
-            groupingColumns: [
-                ...this.state.groupingColumns,
-                item
-            ]
-        });
+        this.setState({ groupingColumns });
     };
 
     onColumnResize(firstCol, firstSize, secondCol, secondSize) {
@@ -202,17 +181,25 @@ class App extends React.Component {
         this.setState({})
     }
 
-    moveCard = (dragIndex, hoverIndex) => {
-        const handleColumnOrderChange = (index, dropIndex) => {
-            const col = columns[index];
-            debugger
-            this.handleMenuColumnsGrouping(col.name);
-            columns.splice(index, 1); //delete from index, 1 item
-            columns.splice(dropIndex, 0, col);
-            this.forceUpdate();
-        };
+    handleColumnOrder = (dragIndex, hoverIndex) => {
+        const col = columns[dragIndex];
+        columns.splice(dragIndex, 1); //delete from index, 1 item
+        columns.splice(hoverIndex, 0, col);
+        this.forceUpdate();
+    };
 
-        handleColumnOrderChange(dragIndex, hoverIndex);
+    handleColumnGrouping = (dragIndex, hoverIndex) => {
+        const col = columns[dragIndex];
+        this.handleMenuColumnsGrouping(col.name);
+        // const handleColumnOrderChange = (index, dropIndex) => {
+        //     const col = columns[index];
+        //     this.handleMenuColumnsGrouping(col.name);
+        //     columns.splice(index, 1); //delete from index, 1 item
+        //     columns.splice(dropIndex, 0, col);
+        //     this.forceUpdate();
+        // };
+        //
+        // handleColumnOrderChange(dragIndex, hoverIndex);
     };
 
     render() {
@@ -223,8 +210,8 @@ class App extends React.Component {
         return (
             <div>
                 <TargetBox
-                    moveCard={this.moveCard}
-                    columns={this._getGroupingColumns()}
+                    handleColumnGrouping={this.handleColumnGrouping}
+                    groupingColumns={this.state.groupingColumns}
                 />
                 <div style={divStyle}>drag here</div>
                 <DataGrid
@@ -235,8 +222,8 @@ class App extends React.Component {
                     onSortChange={this.handleSortChange}
                     columns={columns}
                     style={{height: 400}}
-                    moveCard={this.moveCard}
                     onColumnResize={this.onColumnResize}
+                    handleColumnOrder={this.handleColumnOrder}
                 />
             </div>
         )

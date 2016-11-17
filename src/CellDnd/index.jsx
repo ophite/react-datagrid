@@ -43,6 +43,15 @@ const cardSource = {
 };
 
 const cardTarget = {
+    drop(props, monitor, component) {
+        const tItem = monitor.getItem();
+        if (!tItem) {
+            return
+        }
+        const dragIndex = tItem.index;
+        const hoverIndex = props.index;
+        props.handleColumnOrder(dragIndex, hoverIndex);
+    },
     hover(props, monitor, component) {
         const tItem = monitor.getItem();
         if (!tItem) {
@@ -83,13 +92,13 @@ const cardTarget = {
         }
 
         // Time to actually perform the action
-        props.moveCard(dragIndex, hoverIndex);
+        // props.handleColumnOrder(dragIndex, hoverIndex);
 
         // Note: we're mutating the monitor item here!
         // Generally it's better to avoid mutations,
         // but it's good here for the sake of performance
         // to avoid expensive index searches.
-        monitor.getItem().index = hoverIndex;
+        // monitor.getItem().index = hoverIndex;
     }
 };
 
@@ -230,13 +239,11 @@ Cell.propTypes = {
     text: PropTypes.any,
     rowIndex: PropTypes.number,
 
-    connectDragSource: React.PropTypes.func.isRequired,
-    connectDropTarget: React.PropTypes.func.isRequired,
-    // DndIndex: React.PropTypes.number.isRequired,
-    isDragging: React.PropTypes.bool.isRequired,
-    id: React.PropTypes.any.isRequired,
-    // DndText: React.PropTypes.string.isRequired,
-    moveCard: React.PropTypes.func.isRequired
+    connectDragSource: React.PropTypes.func,
+    // connectDropTarget: React.PropTypes.func,
+    isDragging: React.PropTypes.bool,
+    id: React.PropTypes.any,
+    handleColumnOrder: React.PropTypes.func
 };
 
 Cell.defaultProps ={
