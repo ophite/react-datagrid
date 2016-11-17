@@ -93,7 +93,6 @@ const cardTarget = {
 
         // Time to actually perform the action
         // props.handleColumnOrder(dragIndex, hoverIndex);
-        props.handleColumnOrderHover(dragIndex, hoverIndex);
 
         // Note: we're mutating the monitor item here!
         // Generally it's better to avoid mutations,
@@ -252,7 +251,6 @@ Cell.propTypes = {
     isDragging: React.PropTypes.bool,
     id: React.PropTypes.any,
     handleColumnOrder: React.PropTypes.func,
-    handleColumnOrderHover: React.PropTypes.func
 };
 
 Cell.defaultProps = {

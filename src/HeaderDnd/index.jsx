@@ -226,7 +226,6 @@ class Header extends React.Component {
             <Cell
                 key={column.name}
                 handleColumnOrder={this.props.handleColumnOrder}
-                handleColumnOrderHover={this.props.handleColumnOrderHover}
                 contentPadding={props.cellPadding}
                 columns={props.columns || []}
                 index={index}

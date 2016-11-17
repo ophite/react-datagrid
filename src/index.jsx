@@ -372,8 +372,6 @@ module.exports = React.createClass({
             menuColumn       : state.menuColumn,
             columnMenuFactory: props.columnMenuFactory,
             handleColumnOrder: props.handleColumnOrder,
-            handleColumnOrderHover: props.handleColumnOrderHover,
-            columnHoverIndex : props.columnHoverIndex
         })
     },
 

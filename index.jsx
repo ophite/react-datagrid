@@ -138,9 +138,7 @@ class App extends React.Component {
         this.onColumnResize = this.onColumnResize.bind(this);
         this.handleColumnGrouping = this.handleColumnGrouping.bind(this);
         this.handleColumnOrder = this.handleColumnOrder.bind(this);
-        this.handleColumnOrderHover = this.handleColumnOrderHover.bind(this);
         this.state = {
-            columnHoverIndex: -1,
             groupingColumns: [
                 'country',
                 'grade',
@@ -169,16 +167,6 @@ class App extends React.Component {
         this.setState({})
     }
 
-    handleColumnOrderHover = (dragIndex, hoverIndex) => {
-        // this.setState({
-        //     columnHoverIndex: hoverIndex
-        // });
-        // const col = columns[dragIndex];
-        // columns.splice(dragIndex, 1); //delete from index, 1 item
-        // columns.splice(hoverIndex, 0, col);
-        // this.forceUpdate();
-    };
-
     handleColumnOrder = (dragIndex, hoverIndex) => {
         const col = columns[dragIndex];
         columns.splice(dragIndex, 1); //delete from index, 1 item
@@ -188,19 +176,7 @@ class App extends React.Component {
 
     handleColumnGrouping = (dragIndex, hoverIndex) => {
         const col = columns[dragIndex];
-        this.setState({
-            columnHoverIndex: -1
-        });
         this.handleMenuColumnsGrouping(col.name);
-        // const handleColumnOrderChange = (index, dropIndex) => {
-        //     const col = columns[index];
-        //     this.handleMenuColumnsGrouping(col.name);
-        //     columns.splice(index, 1); //delete from index, 1 item
-        //     columns.splice(dropIndex, 0, col);
-        //     this.forceUpdate();
-        // };
-        //
-        // handleColumnOrderChange(dragIndex, hoverIndex);
     };
 
     render() {
@@ -221,12 +197,10 @@ class App extends React.Component {
                     dataSource={data}
                     sortInfo={SORT_INFO}
                     onSortChange={this.handleSortChange}
-                    columnHoverIndex={this.state.columnHoverIndex}
                     columns={columns}
                     style={{height: 400}}
                     onColumnResize={this.onColumnResize}
                     handleColumnOrder={this.handleColumnOrder}
-                    handleColumnOrderHover={this.handleColumnOrderHover}
                 />
             </div>
         )
