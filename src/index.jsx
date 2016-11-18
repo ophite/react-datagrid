@@ -819,7 +819,7 @@ module.exports = React.createClass({
     
     toggleGroup: function toggleGroup(groupInfo, toggleGroupInfo) {
         if (!toggleGroupInfo) {
-            return;
+            return groupInfo;
         }
 
         var newGroupInfo = [];
