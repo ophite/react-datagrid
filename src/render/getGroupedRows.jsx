@@ -36,8 +36,20 @@ function renderGroupRow(props, groupData){
         paddingLeft: (groupData.depth - 1) * props.groupNestingWidth
     }
 
+    var toggleGroupInfo = {
+        name: groupData.name,
+        value: groupData.value,
+        depth: groupData.depth,
+        valuePath: groupData.valuePath
+    }
 
-    return <Row className='z-group-row' key={'group-'+groupData.valuePath} rowHeight={props.rowHeight}>
+    return <Row 
+        className='z-group-row' 
+        key={'group-'+groupData.valuePath} 
+        rowHeight={props.rowHeight}
+        onToggleGroup={props.onToggleGroup}
+        toggleGroupInfo={toggleGroupInfo}
+        >
         <Cell
             className='z-group-cell'
             contentPadding={props.cellPadding}
