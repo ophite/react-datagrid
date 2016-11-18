@@ -11,7 +11,7 @@ import { DragSource, DropTarget } from 'react-dnd';
 var sorty = require('sorty')
 var React = require('react')
 var ReactDOM = require('react-dom')
-var DataGrid = require('./lib')
+var DataGrid = require('./src')
 var faker = window.faker = require('faker');
 var preventDefault = require('./src/utils/preventDefault')
 
@@ -199,6 +199,7 @@ class App extends React.Component {
                     onSortChange={this.handleSortChange}
                     columns={columns}
                     style={{height: 400}}
+                    groupBy={this.state.groupingColumns}
                     onColumnResize={this.onColumnResize}
                     handleColumnOrder={this.handleColumnOrder}
                 />

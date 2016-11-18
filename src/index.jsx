@@ -815,6 +815,10 @@ module.exports = React.createClass({
     },
     
     toggleGroup: function toggleGroup(groupInfo, toggleGroupInfo) {
+        if (!toggleGroupInfo) {
+            return;
+        }
+
         var newGroupInfo = [];
         
         for(var i = 0; i < groupInfo.length; i++){
@@ -877,6 +881,10 @@ module.exports = React.createClass({
     },
     
     isCollapsedGroup: function isCollapsedGroup(value, groupInfo) {
+        if (!groupInfo || !groupInfo.length) {
+            return false;
+        }
+
         for(var i = 0; i < groupInfo.length; i++)
         {
             var a = value.name === groupInfo[i].name;
