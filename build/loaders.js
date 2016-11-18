@@ -29,5 +29,10 @@ module.exports = [
     test: /\.json$/,
     exclude: /node_modules/,
     loader: 'json'
-  }
+  },
+  { test: /\.(sass)/, loader: 'style!css!resolve-url!sass?sourceMap' },
+  {
+    test: /\.scss$/,
+    loader: 'style!css?modules&sourceMap&localIdentName=[local]___[hash:base64:5]!resolve-url!sass?outputStyle=expanded&sourceMap'
+  },
 ]

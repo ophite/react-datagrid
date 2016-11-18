@@ -9,6 +9,7 @@ var plugins   = require('./plugins')
 var loaders   = require('./loaders')
 var externals = require('./externals')
 var resolve   = require('./resolve')
+var autoprefixer = require('autoprefixer');
 
 module.exports = {
   entry: entry,
@@ -21,6 +22,7 @@ module.exports = {
   externals: externals,
   resolve: resolve,
   plugins: plugins,
+  postcss: [autoprefixer],
 
   devServer: {
       publicPath: PUBLIC,

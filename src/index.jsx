@@ -1,6 +1,7 @@
 'use strict';
-
-require('es6-promise').polyfill()
+// import 'react-toolbox/lib/commons.scss';
+import 'react-toolbox/';
+require('es6-promise').polyfill();
 
 
 import { findDOMNode } from 'react-dom'
