@@ -13,7 +13,7 @@ var React = require('react')
 var ReactDOM = require('react-dom')
 var DataGrid = require('./src')
 var faker = window.faker = require('faker');
-var preventDefault = require('./src/utils/preventDefault')
+var preventDefault = require('./src/utils/preventDefault');
 
 console.log(React.version, ' react version');
 var gen = (function () {
@@ -64,6 +64,7 @@ var LEN = 2000
 var SORT_INFO = [{ name: 'country', dir: 'asc' }]//[ { name: 'id', dir: 'asc'} ]
 var sort = sorty(SORT_INFO)
 var data = gen(LEN);
+var initialData = data.slice();
 
 
 const style = {
@@ -179,6 +180,34 @@ class App extends React.Component {
         this.handleMenuColumnsGrouping(col.name);
     };
 
+    handleFilter(column, value, allFilterValues) {
+        //reset data to original data-array
+        data = initialData;
+
+        //go over all filters and apply them
+        Object.keys(allFilterValues).forEach(function(name){
+            var columnFilter = (allFilterValues[name] + '').toUpperCase()
+
+            if (columnFilter == ''){
+                return
+            }
+
+            data = data.filter(function(item){
+                if ((item[name] + '').toUpperCase().indexOf(columnFilter) === 0){
+                    return true
+                }
+            })
+        })
+
+        this.setState({})
+    }
+
+    handleResetFilter() {
+        data = initialData
+
+        this.setState({})
+    }
+
     render() {
         const divStyle = {
             height: '100px',
@@ -200,6 +229,8 @@ class App extends React.Component {
                     columns={columns}
                     style={{height: 400}}
                     groupBy={this.state.groupingColumns}
+                    handleFilter={this.handleFilter.bind(this)}
+                    handleResetFilter={this.handleResetFilter.bind(this)}
                     onColumnResize={this.onColumnResize}
                     handleColumnOrder={this.handleColumnOrder}
                 />

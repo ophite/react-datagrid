@@ -53,7 +53,10 @@ function getDropState() {
         dropIndex: null,
 
         shiftIndexes: null,
-        shiftSize: null
+        shiftSize: null,
+
+        isFilterMode: false,
+        filterValues: {},
     }
 }
 
@@ -72,11 +75,13 @@ class Header extends React.Component {
             defaultStyle: {},
             sortInfo: null,
             scrollLeft: 0,
-            scrollTop: 0
+            scrollTop: 0,
+            isFilterMode: false,
+            filterValues: {}
         };
     }
 
-    onDrop(event) {
+    onDrop = (event) => {
         var state = this.state
         var props = this.props
 
@@ -102,7 +107,7 @@ class Header extends React.Component {
         }
 
         this.setState(getDropState())
-    }
+    };
 
     render() {
         var props = this.prepareProps(this.props)
@@ -145,19 +150,30 @@ class Header extends React.Component {
             <div style={style} className={props.className}>
                 <div className='z-header' style={headerStyle}>
                     {cells}
+                    {
+                        <button onClick={this.toggleFilter}>
+                            {!state.isFilterMode ? 'Show Filter' : 'Hide filter'}
+                        </button>
+                    }
+                    {
+                        state.isFilterMode ?
+                            <button onClick={this.resetFilter}>
+                                Reset filter
+                            </button> : null
+                    }
                 </div>
             </div>
         )
     }
 
-    renderCell(props, state, column, index) {
+    renderCell = (props, state, column, index)=> {
 
         var resizing = props.resizing
         var text = column.title
-        var className = props.cellClassName || ''
+        var className = props.cellClassName || '';
         var style = {
             left: 0
-        }
+        };
 
         var menu = this.renderColumnMenu(props, state, column, index)
 
@@ -241,11 +257,28 @@ class Header extends React.Component {
                 {filter}
                 {menu}
                 {resizer}
+
+                {
+                    state.isFilterMode ?
+                        <input
+                            onChange={this.handleFilter.bind(this, props, column)}
+                            value={state.filterValues[column.name] || ''}
+                        /> : null
+                }
             </Cell>
         )
-    }
+    };
 
-    toggleSort(column) {
+    resetFilter = ()=> {
+        this.setState({ filterValues: {} });
+        this.props.handleResetFilter();
+    };
+
+    toggleFilter = ()=> {
+        this.setState({ isFilterMode: !this.state.isFilterMode });
+    };
+
+    toggleSort = (column)=> {
         var sortInfo = asArray(clone(this.props.sortInfo))
         var columnSortInfo = getColumnSortInfo(column, sortInfo)
 
@@ -276,9 +309,16 @@ class Header extends React.Component {
 
         ;
         (this.props.onSortChange || emptyFn)(sortInfo)
-    }
+    };
 
-    renderColumnMenu(props, state, column, index) {
+    handleFilter = (props, column, event)=> {
+        var filterValues = JSON.parse(JSON.stringify(this.state.filterValues));
+        filterValues[column.name] = event.target.value;
+        this.setState({ filterValues });
+        props.handleFilter(column, event, filterValues);
+    };
+
+    renderColumnMenu = (props, state, column, index)=> {
         if (!props.withColumnMenu) {
             return
         }
@@ -293,15 +333,15 @@ class Header extends React.Component {
         return <div className="z-show-menu" onMouseUp={this.handleShowMenuMouseUp.bind(this, props, column, index)}>
             {menuIcon}
         </div>
-    }
+    };
 
-    handleShowMenuMouseUp(props, column, index, event) {
+    handleShowMenuMouseUp = (props, column, index, event)=> {
         event.nativeEvent.stopSort = true
 
         this.showMenu(column, event)
-    }
+    };
 
-    showMenu(column, event) {
+    showMenu = (column, event)=> {
 
         var menuItem = function (column) {
             var visibility = this.props.columnVisibility
@@ -349,9 +389,9 @@ class Header extends React.Component {
         this.props.showMenu(menu.bind(this, event.currentTarget), {
             menuColumn: column.name
         })
-    }
+    };
 
-    showFilterMenu(column, event) {
+    showFilterMenu = (column, event)=> {
 
         function menu(eventTarget, props) {
 
@@ -381,17 +421,17 @@ class Header extends React.Component {
         this.props.showMenu(menu.bind(this, event.currentTarget), {
             menuColumn: column.name
         })
-    }
+    };
 
-    toggleColumn(column) {
+    toggleColumn = (column) => {
         this.props.toggleColumn(column)
-    }
+    };
 
-    hideMenu() {
+    hideMenu = () => {
         this.props.showColumnMenu(null, null)
-    }
+    };
 
-    handleResizeMouseDown(column, event) {
+    handleResizeMouseDown = (column, event) => {
         setupColumnResize(this, this.props, column, event)
 
         //in order to prevent setupColumnDrag in handleMouseDown
@@ -401,16 +441,16 @@ class Header extends React.Component {
         if (event.nativeEvent) {
             event.nativeEvent.resizing = true
         }
-    }
+    };
 
-    handleFilterMouseUp(column, event) {
+    handleFilterMouseUp = (column, event)=> {
         event.nativeEvent.stopSort = true
 
         this.showFilterMenu(column, event)
         // event.stopPropagation()
-    }
+    };
 
-    handleMouseUp(column, event) {
+    handleMouseUp = (column, event) => {
         if (this.state.dragging) {
             return
         }
@@ -423,24 +463,24 @@ class Header extends React.Component {
             return
         }
 
-        if (column.sortable) {
+        if (column.sortable && event.target.tagName !== "INPUT") {
             this.toggleSort(column)
         }
-    }
+    };
 
-    handleMouseOut(column) {
+    handleMouseOut = (column) => {
         this.setState({
             mouseOver: false
         })
-    }
+    };
 
-    handleMouseOver(column) {
+    handleMouseOver = (column) => {
         this.setState({
             mouseOver: column.name
         })
-    }
+    };
 
-    handleMouseDown(column, event) {
+    handleMouseDown = (column, event) => {
         if (event && event.nativeEvent && event.nativeEvent.resizing) {
             return
         }
@@ -450,28 +490,28 @@ class Header extends React.Component {
         }
 
         setupColumnDrag(this, this.props, column, event)
-    }
+    };
 
-    onResizeDragStart(config) {
+    onResizeDragStart = (config) => {
         this.setState({
             resizing: true
         })
         this.props.onColumnResizeDragStart(config)
-    }
+    };
 
-    onResizeDrag(config) {
+    onResizeDrag = (config) => {
         this.props.onColumnResizeDrag(config)
-    }
+    };
 
-    onResizeDrop(config, resizeInfo, event) {
+    onResizeDrop = (config, resizeInfo, event) => {
         this.setState({
             resizing: false
         })
 
         this.props.onColumnResizeDrop(config, resizeInfo)
-    }
+    };
 
-    prepareProps(thisProps) {
+    prepareProps = (thisProps) => {
         var props = {}
 
         assign(props, thisProps)
@@ -489,22 +529,22 @@ class Header extends React.Component {
         props.columnMap = columnMap
 
         return props
-    }
+    };
 
-    prepareClassName(props) {
+    prepareClassName = (props) => {
         props.className = props.className || ''
         props.className += ' ' + props.defaultClassName
 
         if (this.state.dragging) {
             props.className += ' ' + props.draggingClassName
         }
-    }
+    };
 
-    prepareStyle(props) {
+    prepareStyle = (props) => {
         var style = props.style = {}
 
         assign(style, props.defaultStyle)
-    }
+    };
 }
 
 Header.propTypes = {
