@@ -58,6 +58,9 @@ module.exports = React.createClass({
   },
 
   handleRowClick: function(event){
+    if(this.props.onToggleGroup){
+        this.props.onToggleGroup(this.props.toggleGroupInfo);
+    }
 
     if (this.props.onClick){
         this.props.onClick(event)

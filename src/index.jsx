@@ -247,7 +247,7 @@ module.exports = React.createClass({
         var length     = props.data.length
 
         if (state.groupData){
-            length += state.groupData.groupsCount
+            length = state.groupData.collapsedLength;
         }
 
         if (!rowCount){
@@ -534,7 +534,7 @@ module.exports = React.createClass({
                             data.length
 
         var totalLength = state.groupData?
-                            data.length + state.groupData.groupsCount:
+                            state.groupData.collapsedLength:
                             data.length
 
         if (props.virtualRendering){
@@ -577,6 +577,7 @@ module.exports = React.createClass({
 
             onScrollLeft    : this.handleScrollLeft,
             onScrollTop     : this.handleScrollTop,
+            onToggleGroup   : this.handleToggleGroup,
             // onScrollOverflow: props.virtualPagination? this.handleVerticalScrollOverflow: null,
 
             menu            : state.menu,
@@ -613,6 +614,10 @@ module.exports = React.createClass({
         this.handleSelection(rowProps, event)
     },
 
+    handleToggleGroup: function handleToggleGroup(toggleGroupInfo) {
+        this.groupData(this.props, toggleGroupInfo);
+    },
+    
     prepareProps: function(thisProps, state){
         var props = assign({}, thisProps)
 
@@ -754,18 +759,165 @@ module.exports = React.createClass({
         return this.props.rowHeight == null? this.state.rowHeight: this.props.rowHeight
     },
 
-    groupData: function(props){
-        if (props.groupBy){
-            var data = this.prepareData(props)
+    groupData: function groupData(props, toggleGroupInfo) {
+        if (props.groupBy) {
+            var groupInfo = this.state.groupInfo;
+            var data = this.prepareData(props);
+            
+            if(!groupInfo){
+                groupInfo = group(data, props.groupBy);
+                groupInfo = this.prepareGroupInfo(groupInfo);
+            }else {
+                groupInfo = this.toggleGroup(groupInfo, toggleGroupInfo);
+            }
 
+            var groupData = group(data, props.groupBy);
+            groupData = this.collapseGroups(groupData, groupInfo);
+            groupData.collapsedLength = this.getGroupDataLength(groupData);
+            
             this.setState({
-                groupData: group(data, props.groupBy)
-            })
+                groupData: groupData,
+                groupInfo: groupInfo
+            });
 
-            delete this.groupedRows
+            delete this.groupedRows;
         }
     },
 
+    prepareGroupInfo: function prepareGroupInfo(groupData) {
+        var groupInfo = [];
+        
+        if(Array.isArray(groupData.data))
+            return groupInfo;
+            
+        this.appendGroupInfo(groupData.data, groupInfo);
+        return groupInfo;
+    },
+    
+    appendGroupInfo: function appendGroupInfo(data, groupInfo) {
+        for(var key in data){
+            var value = data[key];
+            groupInfo.push({
+                name: value.name,
+                value: value.value,
+                depth: value.depth,
+                valuePath: value.valuePath,
+                collapsed: true
+            });
+        }
+        
+        for(var key in data){
+            var value = data[key];
+            
+            if(!Array.isArray(value.data))
+                this.appendGroupInfo(value.data, groupInfo);
+        }
+    },
+    
+    toggleGroup: function toggleGroup(groupInfo, toggleGroupInfo) {
+        var newGroupInfo = [];
+        
+        for(var i = 0; i < groupInfo.length; i++){
+            newGroupInfo.push(assign({}, groupInfo[i]));
+        }
+        
+        for(var i = 0; i < newGroupInfo.length; i++){
+            var a = newGroupInfo[i].name === toggleGroupInfo.name;
+            var b = newGroupInfo[i].value === toggleGroupInfo.value;
+            var c = newGroupInfo[i].depth === toggleGroupInfo.depth;
+            var d = this.arraysEqual(newGroupInfo[i].valuePath, toggleGroupInfo.valuePath);
+            
+            if(a && b && c && d){
+                newGroupInfo[i].collapsed = !newGroupInfo[i].collapsed;
+            }
+        }
+        
+        return newGroupInfo;
+    },
+
+    arraysEqual: function arraysEqual(arr1, arr2) {
+        if(!arr1 || !arr2)
+            return false;
+
+        if(arr1.length != arr2.length)
+            return false;
+            
+        for(var i = 0; i < arr1.length; i++){
+            if(arr1[i] !== arr2[i])
+                return false;
+        }
+        
+        return true;
+    },
+    
+    collapseGroups: function collapseGroups(groupData, groupInfo) {
+        if(Array.isArray(groupData.data))
+            return groupData;
+        
+        this.collapseData(groupData.data, groupInfo);
+        return groupData;
+    },
+    
+    collapseData: function collapseData(data, groupInfo) {
+        for(var key in data){
+            var value = data[key];
+            
+            if(this.isCollapsedGroup(value, groupInfo)){
+                value.data = [];
+                value.keys = [];
+            }
+        }
+        
+        for(var key in data){
+            var value = data[key];
+            
+            if(!Array.isArray(value.data))
+                this.collapseData(value.data, groupInfo);
+        }        
+    },
+    
+    isCollapsedGroup: function isCollapsedGroup(value, groupInfo) {
+        for(var i = 0; i < groupInfo.length; i++)
+        {
+            var a = value.name === groupInfo[i].name;
+            var b = value.value === groupInfo[i].value;
+            var c = value.depth === groupInfo[i].depth;
+            var d = this.arraysEqual(value.valuePath, groupInfo[i].valuePath);
+            
+            if(a && b && c && d)
+                return groupInfo[i].collapsed;
+        }
+        
+        return false;
+    },
+    
+    getGroupDataLength: function getGroupDataLength(groupData) {
+        if(Array.isArray(groupData.data))
+            return groupData.length;        
+            
+        var len = {
+            length: 0
+        };
+        
+        this.updateGroupDataLength(groupData.data, len);
+        return len.length;
+    },
+    
+    updateGroupDataLength: function updateGroupDataLength(data, len) {
+        for(var key in data){
+            len.length += 1;
+        }
+        
+        for(var key in data){
+            var value = data[key];
+            
+            if(!Array.isArray(value.data))
+                this.updateGroupDataLength(value.data, len);
+            else
+                len.length += value.data.length;
+        }
+    },
+    
     isValidPage: function(page, props) {
         return page >= 1 && page <= this.getMaxPage(props)
     },
