@@ -8,7 +8,7 @@ var React = require('react')
 var ReactDOM = require('react-dom')
 var DataGrid = require('./src')
 var faker = window.faker = require('faker');
-var preventDefault = require('./src/utils/preventDefault')
+var preventDefault = require('./src/utils/preventDefault');
 
 console.log(React.version,' react version');
 var gen = (function(){
@@ -25,7 +25,7 @@ var gen = (function(){
 
         for (var i = 0; i < len; i++){
             arr.push({
-                id       : i + 1,
+                index       : i + 1,
                 // id: Guid.create(),
                 grade      : Math.round(Math.random() * 10),
                 email    : faker.internet.email(),
@@ -59,6 +59,7 @@ var LEN = 2000
 var SORT_INFO = [{name: 'country', dir: 'asc'}]//[ { name: 'id', dir: 'asc'} ]
 var sort = sorty(SORT_INFO)
 var data = gen(LEN);
+var initialData = data.slice();
 
 class App extends React.Component {
     constructor(props, context) {
@@ -72,6 +73,34 @@ class App extends React.Component {
         this.setState({})
     }
 
+    handleFilter(column, value, allFilterValues) {
+        //reset data to original data-array
+        data = initialData
+
+        //go over all filters and apply them
+        Object.keys(allFilterValues).forEach(function(name){
+            var columnFilter = (allFilterValues[name] + '').toUpperCase()
+
+            if (columnFilter == ''){
+                return
+            }
+
+            data = data.filter(function(item){
+                if ((item[name] + '').toUpperCase().indexOf(columnFilter) === 0){
+                    return true
+                }
+            })
+        })
+
+        this.setState({})
+    }
+
+    handleResetFilter() {
+        data = initialData
+
+        this.setState({})
+    }
+
     render() {
         return <DataGrid
             ref="dataGrid"
@@ -81,6 +110,8 @@ class App extends React.Component {
             onSortChange={this.handleSortChange}
             columns={columns}
             style={{height: 400}}
+            handleFilter={this.handleFilter.bind(this)}
+            handleResetFilter={this.handleResetFilter.bind(this)}
             onColumnResize={this.onColumnResize}
         />
     }

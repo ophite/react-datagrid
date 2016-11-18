@@ -337,7 +337,6 @@ module.exports = React.createClass({
     },
 
     prepareHeader: function(props, state){
-
         var allColumns = props.columns
         var columns    = getVisibleColumns(props, state)
 
@@ -365,6 +364,8 @@ module.exports = React.createClass({
             onColumnResizeDragStart: this.onColumnResizeDragStart,
             onColumnResizeDrag: this.onColumnResizeDrag,
             onColumnResizeDrop: this.onColumnResizeDrop,
+            handleFilter         : props.handleFilter,
+            handleResetFilter   : props.handleResetFilter,
 
             toggleColumn     : this.toggleColumn.bind(this, props),
             showMenu         : this.showMenu,
