@@ -260,10 +260,13 @@ class Header extends React.Component {
 
                 {
                     state.isFilterMode ?
-                        <input
-                            onChange={this.handleFilter.bind(this, props, column)}
-                            value={state.filterValues[column.name] || ''}
-                        /> : null
+                        <div className="z-field-wrap">
+                            <input
+                                onChange={this.handleFilter.bind(this, props, column)}
+                                value={state.filterValues[column.name] || ''}
+                                className="z-field"
+                            />
+                        </div>: null
                 }
             </Cell>
         )

@@ -114,6 +114,7 @@
     .z-column-header
         position relative
         font-weight $datagrid-column-header-font-weight
+        border-right 1px solid rgba(0,0,0,0.12)
 
         .z-inner
 
@@ -135,7 +136,7 @@
             color #fff
 
             &.column-drag-hover
-                background-color yellowgreen
+                background: #cfcfcf
 
 
         &.z-sortable
@@ -202,3 +203,14 @@
 
         polygon
             fill #fff !important
+
+    .z-field-wrap
+        padding 0 22px 18px 18px
+
+    .z-field
+        border .1px solid $datagrid-header-border-color
+        font-weight: normal
+        margin-top: -5px
+        outline none
+        padding: 5px
+        width: 100%
