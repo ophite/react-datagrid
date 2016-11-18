@@ -1,5 +1,4 @@
 'use strict';
-import {Button, IconButton} from 'react-toolbox/lib/button';
 import { IconMenu, MenuItem } from 'react-toolbox/lib/menu';
 var React = require('react')
 var Region = require('region')
@@ -131,8 +130,8 @@ class Header extends React.Component {
 
         return (
             <IconMenu icon='more_vert' position='topLeft' menuRipple>
-                <MenuItem value='download' icon='get_app' caption='Download' />
-                <MenuItem value='help' icon='favorite' caption='Favorite' />
+                {showHideFilterView}
+                {resetFilterView}
             </IconMenu>
         );
     };
@@ -176,10 +175,9 @@ class Header extends React.Component {
 
         return (
             <div style={style} className={props.className}>
-                {this.renderMenu()}
-                <Button icon='bookmark' label='Bookmark' accent />
                 <div className='z-header' style={headerStyle}>
                     {cells}
+                    {this.renderMenu()}
                 </div>
             </div>
         )
