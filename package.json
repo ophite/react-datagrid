@@ -20,7 +20,24 @@
     "dist.min": "webpack --progress --colors -p --config build/dist.min.config.js",
     "build": "NODE_ENV=production npm run lib && npm run dist && npm run dist.min && npm run build-style && npm run build-style-dist && npm run build-style-dist-min",
     "dev": "NODE_ENV=production PORT=9090 webpack-dev-server --progress --colors --config  build/dev.config.js",
-    "hot": "NODE_ENV=production HOT=true PORT=9090 webpack-dev-server --progress --colors --config build/dev.config.js"
+    "better:run": "better-npm-run run",
+    "better:build": "better-npm-run build"
+  },
+  "betterScripts": {
+    "run": {
+      "command": "webpack-dev-server --progress --colors --config  build/dev.config.js",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "9090"
+      }
+    },
+    "build": {
+      "command": "npm run lib && npm run dist && npm run dist.min && npm run build-style && npm run build-style-dist && npm run build-style-dist-min",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "9090"
+      }
+    }
   },
   "repository": {
     "type": "git",
