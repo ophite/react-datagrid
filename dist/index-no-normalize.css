@@ -726,6 +726,7 @@ html.u-app body * {
 .react-datagrid .z-column-header {
   position: relative;
   font-weight: bold;
+  border-right: 1px solid rgba(0,0,0,0.12);
 }
 .react-datagrid .z-column-header .z-inner {
   display: -webkit-box;
@@ -756,7 +757,7 @@ html.u-app body * {
   color: #fff;
 }
 .react-datagrid .z-column-header .z-content.column-drag-hover {
-  background-color: #9acd32;
+  background: #cfcfcf;
 }
 .react-datagrid .z-column-header.z-sortable .z-inner {
   cursor: pointer;
@@ -810,6 +811,17 @@ html.u-app body * {
 }
 .react-datagrid .z-show-menu polygon {
   fill: #fff !important;
+}
+.react-datagrid .z-field-wrap {
+  padding: 0 22px 18px 18px;
+}
+.react-datagrid .z-field {
+  border: 0.1px solid rgba(0,0,0,0.12);
+  font-weight: normal;
+  margin-top: -5px;
+  outline: none;
+  padding: 5px;
+  width: 100%;
 }
 .react-datagrid .z-column-content {
   overflow: visible;
