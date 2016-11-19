@@ -109,31 +109,35 @@ class Header extends React.Component {
         this.setState(getDropState())
     };
 
+
     renderMenu = () => {
         const { isFilterMode } = this.state;
-        const showHideFilterView = (
-            <MenuItem
-                onSelect={this.toggleFilter}
-                icon='fiber_manual_record'
-                value={!isFilterMode ? 'Show Filter' : 'Hide filter'}
-                caption={!isFilterMode ? 'Show Filter' : 'Hide filter'}
-            />
-        );
-        const resetFilterView = (
-            isFilterMode ?
-                <MenuItem
-                    onSelect={this.resetFilter}
-                    icon='fiber_manual_record'
-                    value='Reset filter'
-                    caption='Reset filter'/> : null
-        );
-
-        return (
-            <IconMenu icon='more_vert' position='topLeft' menuRipple>
-                {showHideFilterView}
-                {resetFilterView}
-            </IconMenu>
-        );
+        if (isFilterMode) {
+            return (
+                <IconMenu icon='more_vert' position='bottomRight' >
+                    <MenuItem
+                        onClick={this.toggleFilter}
+                        value='Hide filter'
+                        caption='Hide filter'
+                    />
+                    <MenuItem
+                        onClick={this.resetFilter}
+                        value='Reset filter'
+                        caption='Reset filter'
+                    />
+                </IconMenu>
+            );
+        } else {
+            return (
+                <IconMenu icon='more_vert' position='bottomRight' >
+                    <MenuItem
+                        onClick={this.toggleFilter}
+                        value='Show filter'
+                        caption='Show filter'
+                    />
+                </IconMenu>
+            );
+        }
     };
 
     render() {
@@ -175,6 +179,7 @@ class Header extends React.Component {
 
         return (
             <div style={style} className={props.className}>
+                {this.renderMenu()}
                 <div className='z-header' style={headerStyle}>
                     {cells}
                     {this.renderMenu()}
