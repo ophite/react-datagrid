@@ -114,7 +114,7 @@ class Header extends React.Component {
         if (isFilterMode) {
             return (
                 <div className="grid-menu">
-                    <IconMenu icon='more_vert' position='bottomRight'>
+                    <IconMenu icon='more_vert' position='topRight'>
                         <MenuItem
                             onClick={this.toggleFilter}
                             value='Hide filter'
@@ -131,7 +131,7 @@ class Header extends React.Component {
         } else {
             return (
                 <div className="grid-menu">
-                    <IconMenu icon='more_vert' position='bottomRight' >
+                    <IconMenu icon='more_vert' position='topRight' >
                         <MenuItem
                             onClick={this.toggleFilter}
                             value='Show filter'
