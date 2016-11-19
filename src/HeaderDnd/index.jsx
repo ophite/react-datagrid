@@ -131,7 +131,7 @@ class Header extends React.Component {
         } else {
             return (
                 <div className="grid-menu">
-                    <IconMenu icon='more_vert' position='topRight' >
+                    <IconMenu icon='more_vert' position='topRight'>
                         <MenuItem
                             onClick={this.toggleFilter}
                             value='Show filter'
@@ -290,19 +290,23 @@ class Header extends React.Component {
                                 value={state.filterValues[column.name] || ''}
                                 className="z-field"
                             />
-                        </div>: null
+                        </div> : null
                 }
             </Cell>
         )
     };
 
     resetFilter = ()=> {
-        this.setState({ filterValues: {} });
-        this.props.handleResetFilter();
+        setTimeout(()=> {
+            this.setState({ filterValues: {} });
+            this.props.handleResetFilter();
+        }, 500) // TODO only for demo. Then delete, fix menu timeOut
     };
 
     toggleFilter = ()=> {
-        this.setState({ isFilterMode: !this.state.isFilterMode });
+        setTimeout(()=> {
+            this.setState({ isFilterMode: !this.state.isFilterMode });
+        }, 500)// TODO only for demo. Then delete, fix menu timeOut
     };
 
     toggleSort = (column)=> {
