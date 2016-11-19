@@ -113,28 +113,32 @@ class Header extends React.Component {
         const { isFilterMode } = this.state;
         if (isFilterMode) {
             return (
-                <IconMenu icon='more_vert' position='bottomRight' >
-                    <MenuItem
-                        onClick={this.toggleFilter}
-                        value='Hide filter'
-                        caption='Hide filter'
-                    />
-                    <MenuItem
-                        onClick={this.resetFilter}
-                        value='Reset filter'
-                        caption='Reset filter'
-                    />
-                </IconMenu>
+                <div className="grid-menu">
+                    <IconMenu icon='more_vert' position='bottomRight'>
+                        <MenuItem
+                            onClick={this.toggleFilter}
+                            value='Hide filter'
+                            caption='Hide filter'
+                        />
+                        <MenuItem
+                            onClick={this.resetFilter}
+                            value='Reset filter'
+                            caption='Reset filter'
+                        />
+                    </IconMenu>
+                </div>
             );
         } else {
             return (
-                <IconMenu icon='more_vert' position='bottomRight' >
-                    <MenuItem
-                        onClick={this.toggleFilter}
-                        value='Show filter'
-                        caption='Show filter'
-                    />
-                </IconMenu>
+                <div className="grid-menu">
+                    <IconMenu icon='more_vert' position='bottomRight' >
+                        <MenuItem
+                            onClick={this.toggleFilter}
+                            value='Show filter'
+                            caption='Show filter'
+                        />
+                    </IconMenu>
+                </div>
             );
         }
     };

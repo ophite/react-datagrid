@@ -106,6 +106,8 @@
         flex 0 0 auto
         background $datagrid-header-background !important
         border-bottom $datagrid-header-border-width $datagrid-header-border-style $datagrid-header-border-color
+        position relative
+        z-index 100
 
         &.z-dragging
             .z-column-header:not(.z-drag)
@@ -132,7 +134,6 @@
             text-overflow ellipsis
             white-space nowrap
             overflow hidden
-            padding 18px !important
             color #fff
 
             &.column-drag-hover
@@ -214,3 +215,11 @@
         outline none
         padding: 5px
         width: 100%
+
+    .grid-menu
+        display flex
+        align-items center
+
+        > div
+            display inline-flex
+

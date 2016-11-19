@@ -21,14 +21,25 @@
             background $datagrid-row-selected-background
         .z-cell
             datagrid-cell()
-            padding 18px
 
     .z-group-row
+        background $datagrid-group-row-background
+        position relative
+        &:before
+            content '+'
+            font-size 20px
+            position absolute
+            right 20px
+            top calc(50% - 10px)
+
+        &.open
+            &:before
+                content '–'
+
+
         &.z-over
         &.z-over.z-odd
             background $datagrid-group-row-over-background
 
     .z-group-cell
         flex 1
-    .z-group-row
-        background $datagrid-group-row-background
