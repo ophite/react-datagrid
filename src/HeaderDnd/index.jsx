@@ -1,5 +1,5 @@
 'use strict';
-
+import { IconMenu, MenuItem } from 'react-toolbox/lib/menu';
 var React = require('react')
 var Region = require('region')
 var ReactMenu = React.createFactory(require('react-menus'))
@@ -109,6 +109,37 @@ class Header extends React.Component {
         this.setState(getDropState())
     };
 
+
+    renderMenu = () => {
+        const { isFilterMode } = this.state;
+        if (isFilterMode) {
+            return (
+                <IconMenu icon='more_vert' position='bottomRight' >
+                    <MenuItem
+                        onClick={this.toggleFilter}
+                        value='Hide filter'
+                        caption='Hide filter'
+                    />
+                    <MenuItem
+                        onClick={this.resetFilter}
+                        value='Reset filter'
+                        caption='Reset filter'
+                    />
+                </IconMenu>
+            );
+        } else {
+            return (
+                <IconMenu icon='more_vert' position='bottomRight' >
+                    <MenuItem
+                        onClick={this.toggleFilter}
+                        value='Show filter'
+                        caption='Show filter'
+                    />
+                </IconMenu>
+            );
+        }
+    };
+
     render() {
         var props = this.prepareProps(this.props)
         var state = this.state
@@ -132,7 +163,7 @@ class Header extends React.Component {
                     var col = props.columnMap[colName]
                     columns.push(col)
                     return cellMap[colName]
-                })
+                });
 
                 return <Cell {...cellProps}>
                     {cells}
@@ -144,23 +175,14 @@ class Header extends React.Component {
         var headerStyle = normalize({
             paddingRight: props.scrollbarSize,
             transform: 'translate3d(' + -props.scrollLeft + 'px, ' + -props.scrollTop + 'px, 0px)'
-        })
+        });
 
         return (
             <div style={style} className={props.className}>
+                {this.renderMenu()}
                 <div className='z-header' style={headerStyle}>
                     {cells}
-                    {
-                        <button onClick={this.toggleFilter}>
-                            {!state.isFilterMode ? 'Show Filter' : 'Hide filter'}
-                        </button>
-                    }
-                    {
-                        state.isFilterMode ?
-                            <button onClick={this.resetFilter}>
-                                Reset filter
-                            </button> : null
-                    }
+                    {this.renderMenu()}
                 </div>
             </div>
         )

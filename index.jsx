@@ -1,6 +1,7 @@
 'use strict';
 
 require('./index.styl')
+import { IconMenu, MenuItem } from 'react-toolbox/lib/menu';
 
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -208,6 +209,33 @@ class App extends React.Component {
         this.setState({})
     }
 
+    renderMenu = () => {
+        const { isFilterMode } = this.state;
+        const showHideFilterView = (
+            <MenuItem
+                onSelect={this.toggleFilter}
+                icon='fiber_manual_record'
+                value={!isFilterMode ? 'Show Filter' : 'Hide filter'}
+                caption={!isFilterMode ? 'Show Filter' : 'Hide filter'}
+            />
+        );
+        const resetFilterView = (
+            isFilterMode ?
+                <MenuItem
+                    onSelect={this.resetFilter}
+                    icon='fiber_manual_record'
+                    value='Reset filter'
+                    caption='Reset filter'/> : null
+        );
+
+        return (
+            <IconMenu icon='more_vert' position='topLeft' menuRipple>
+                <MenuItem value='download' icon='get_app' caption='Download' />
+                <MenuItem value='help' icon='favorite' caption='Favorite' />
+            </IconMenu>
+        );
+    };
+
     render() {
         const divStyle = {
             height: '100px',
@@ -215,6 +243,7 @@ class App extends React.Component {
 
         return (
             <div>
+                {this.renderMenu()}
                 <TargetBox
                     handleColumnGrouping={this.handleColumnGrouping}
                     groupingColumns={this.state.groupingColumns}
