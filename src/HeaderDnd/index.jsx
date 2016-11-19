@@ -109,7 +109,6 @@ class Header extends React.Component {
         this.setState(getDropState())
     };
 
-
     renderMenu = () => {
         const { isFilterMode } = this.state;
         if (isFilterMode) {
@@ -179,7 +178,6 @@ class Header extends React.Component {
 
         return (
             <div style={style} className={props.className}>
-                {this.renderMenu()}
                 <div className='z-header' style={headerStyle}>
                     {cells}
                     {this.renderMenu()}
