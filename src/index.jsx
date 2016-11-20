@@ -768,6 +768,10 @@ module.exports = React.createClass({
             var groupInfo = this.state.groupInfo;
             var data = this.prepareData(props);
             
+            if(!this.arraysEqual(props.groupBy, this.state.groupBy)){
+                groupInfo = null;
+            }
+            
             if (!groupInfo) {
                 groupInfo = group(data, props.groupBy);
                 groupInfo = this.prepareGroupInfo(groupInfo);
@@ -781,7 +785,8 @@ module.exports = React.createClass({
             
             this.setState({
                 groupData: groupData,
-                groupInfo: groupInfo
+                groupInfo: groupInfo,
+                groupBy: props.groupBy
             });
 
             delete this.groupedRows;
