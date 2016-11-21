@@ -1,32 +1,33 @@
 'use strict';
-
-require('es6-promise').polyfill()
+// import 'react-toolbox/lib/commons.scss';
+import 'react-toolbox/';
+require('es6-promise').polyfill();
 
 
 import { findDOMNode } from 'react-dom'
 import React from 'react'
 
-var assign   = require('object-assign')
+var assign = require('object-assign')
 import LoadMask from 'react-load-mask'
-var Region   = require('region')
+var Region = require('region')
 
 var PaginationToolbar = React.createFactory(require('./PaginationToolbar'))
 var Column = require('./models/Column')
 
-var PropTypes      = require('./PropTypes')
-var Wrapper        = require('./Wrapper')
-var Header         = require('./Header')
+var PropTypes = require('./PropTypes')
+var Wrapper = require('./Wrapper')
+import Header from './HeaderDnd'
 var WrapperFactory = React.createFactory(Wrapper)
-var HeaderFactory  = React.createFactory(Header)
+var HeaderFactory = React.createFactory(Header)
 var ResizeProxy = require('./ResizeProxy')
 
 var findIndexByName = require('./utils/findIndexByName')
-var group           = require('./utils/group')
+var group = require('./utils/group')
 
-var slice          = require('./render/slice')
-var getTableProps    = require('./render/getTableProps')
+var slice = require('./render/slice')
+var getTableProps = require('./render/getTableProps')
 var getGroupedRows = require('./render/getGroupedRows')
-var renderMenu     = require('./render/renderMenu')
+var renderMenu = require('./render/renderMenu')
 
 var preventDefault = require('./utils/preventDefault')
 
@@ -34,32 +35,33 @@ var isArray = Array.isArray
 
 var SIZING_ID = '___SIZING___'
 
-function clamp(value, min, max){
-    return value < min?
-        min:
-        value > max?
-            max:
+function clamp(value, min, max) {
+    return value < min ?
+        min :
+        value > max ?
+            max :
             value
 }
 
-function signum(x){
-    return x < 0? -1: 1
+function signum(x) {
+    return x < 0 ? -1 : 1
 }
 
-function emptyFn(){}
+function emptyFn() {
+}
 
-function getVisibleCount(props, state){
+function getVisibleCount(props, state) {
     return getVisibleColumns(props, state).length
 }
 
-function getVisibleColumns(props, state){
+function getVisibleColumns(props, state) {
 
-    var visibility     = state.visibility
-    var visibleColumns = props.columns.filter(function(c){
+    var visibility = state.visibility
+    var visibleColumns = props.columns.filter(function (c) {
         var name = c.name
         var visible = c.visible
 
-        if (name in visibility){
+        if (name in visibility) {
             visible = !!visibility[name]
         }
 
@@ -69,12 +71,12 @@ function getVisibleColumns(props, state){
     return visibleColumns
 }
 
-function findColumn(columns, column){
+function findColumn(columns, column) {
 
-    var name = typeof column === 'string'? column: column.name
+    var name = typeof column === 'string' ? column : column.name
     var index = findIndexByName(columns, name)
 
-    if (~index){
+    if (~index) {
         return columns[index]
     }
 }
@@ -89,19 +91,19 @@ module.exports = React.createClass({
     ],
 
     propTypes: {
-        loading          : React.PropTypes.bool,
-        virtualRendering : React.PropTypes.bool,
+        loading: React.PropTypes.bool,
+        virtualRendering: React.PropTypes.bool,
 
         //specify false if you don't want any column to be resizable
-        resizableColumns : React.PropTypes.bool,
+        resizableColumns: React.PropTypes.bool,
         filterable: React.PropTypes.bool,
 
         //specify false if you don't want column menus to be displayed
-        withColumnMenu   : React.PropTypes.bool,
-        cellEllipsis     : React.PropTypes.bool,
-        sortable         : React.PropTypes.bool,
-        loadMaskOverHeader : React.PropTypes.bool,
-        idProperty       : React.PropTypes.string.isRequired,
+        withColumnMenu: React.PropTypes.bool,
+        cellEllipsis: React.PropTypes.bool,
+        sortable: React.PropTypes.bool,
+        loadMaskOverHeader: React.PropTypes.bool,
+        idProperty: React.PropTypes.string.isRequired,
 
         //you can customize the column menu by specifying a factory
         columnMenuFactory: React.PropTypes.func,
@@ -112,15 +114,15 @@ module.exports = React.createClass({
         /**
          * @cfg {Number/String} columnMinWidth=50
          */
-        columnMinWidth   : PropTypes.numeric,
-        scrollBy         : PropTypes.numeric,
-        rowHeight        : PropTypes.numeric,
-        sortInfo         : PropTypes.sortInfo,
-        columns          : PropTypes.column,
+        columnMinWidth: PropTypes.numeric,
+        scrollBy: PropTypes.numeric,
+        rowHeight: PropTypes.numeric,
+        sortInfo: PropTypes.sortInfo,
+        columns: PropTypes.column,
 
-        data: function(props, name){
+        data: function (props, name) {
             var value = props[name]
-            if (isArray(value)){
+            if (isArray(value)) {
                 return new Error('We are deprecating the "data" array prop. Use "dataSource" instead! It can either be an array (for local data) or a remote data source (string url, promise or function)')
             }
         }
@@ -128,12 +130,12 @@ module.exports = React.createClass({
 
     getDefaultProps: require('./getDefaultProps'),
 
-    componentDidMount: function(){
+    componentDidMount: function () {
         window.addEventListener('click', this.windowClickListener = this.onWindowClick)
         // this.checkRowHeight(this.props)
     },
 
-    componentWillUnmount: function(){
+    componentWillUnmount: function () {
         this.scroller = null
         window.removeEventListener('click', this.windowClickListener)
     },
@@ -156,16 +158,16 @@ module.exports = React.createClass({
     //     }
     // },
 
-    onWindowClick: function(event){
-        if (this.state.menu){
+    onWindowClick: function (event) {
+        if (this.state.menu) {
             this.setState({
                 menuColumn: null,
-                menu      : null
+                menu: null
             })
         }
     },
 
-    getInitialState: function(){
+    getInitialState: function () {
 
         var props = this.props
         var defaultSelected = props.defaultSelected
@@ -173,20 +175,20 @@ module.exports = React.createClass({
         return {
             startIndex: 0,
             scrollLeft: 0,
-            scrollTop : 0,
+            scrollTop: 0,
             menuColumn: null,
             defaultSelected: defaultSelected,
             visibility: {},
             defaultPageSize: props.defaultPageSize,
-            defaultPage : props.defaultPage
+            defaultPage: props.defaultPage
         }
     },
 
-    updateStartIndex: function() {
+    updateStartIndex: function () {
         this.handleScrollTop()
     },
 
-    handleScrollLeft: function(scrollLeft){
+    handleScrollLeft: function (scrollLeft) {
 
         this.setState({
             scrollLeft: scrollLeft,
@@ -194,19 +196,19 @@ module.exports = React.createClass({
         })
     },
 
-    handleScrollTop: function(scrollTop){
+    handleScrollTop: function (scrollTop) {
         var props = this.p
         var state = this.state
 
-        scrollTop = scrollTop === undefined? this.state.scrollTop: scrollTop
+        scrollTop = scrollTop === undefined ? this.state.scrollTop : scrollTop
 
         state.menuColumn = null
 
         this.scrollTop = scrollTop
 
-        if (props.virtualRendering){
+        if (props.virtualRendering) {
 
-            var prevIndex        = this.state.startIndex || 0
+            var prevIndex = this.state.startIndex || 0
             var renderStartIndex = Math.ceil(scrollTop / props.rowHeight)
 
             state.startIndex = renderStartIndex
@@ -241,18 +243,18 @@ module.exports = React.createClass({
         this.setState(state)
     },
 
-    getRenderEndIndex: function(props, state){
+    getRenderEndIndex: function (props, state) {
         var startIndex = state.startIndex
-        var rowCount   = props.rowCountBuffer
-        var length     = props.data.length
+        var rowCount = props.rowCountBuffer
+        var length = props.data.length
 
-        if (state.groupData){
-            length += state.groupData.groupsCount
+        if (state.groupData) {
+            length = state.groupData.collapsedLength;
         }
 
-        if (!rowCount){
+        if (!rowCount) {
             var maxHeight
-            if (props.style && typeof props.style.height === 'number'){
+            if (props.style && typeof props.style.height === 'number') {
                 maxHeight = props.style.height
             } else {
                 maxHeight = window.screen.height
@@ -262,44 +264,45 @@ module.exports = React.createClass({
 
         var endIndex = startIndex + rowCount
 
-        if (endIndex > length - 1){
+        if (endIndex > length - 1) {
             endIndex = length
         }
 
         return endIndex
     },
 
-    onDropColumn: function(index, dropIndex){
-        ;(this.props.onColumnOrderChange || emptyFn)(index, dropIndex)
+    onDropColumn: function (index, dropIndex) {
+        ;
+        (this.props.onColumnOrderChange || emptyFn)(index, dropIndex)
     },
 
-    toggleColumn: function(props, column){
+    toggleColumn: function (props, column) {
 
         var visible = column.visible
         var visibility = this.state.visibility
 
-        if (column.name in visibility){
+        if (column.name in visibility) {
             visible = visibility[column.name]
         }
 
         column = findColumn(this.props.columns, column)
 
-        if (visible && getVisibleCount(props, this.state) === 1){
+        if (visible && getVisibleCount(props, this.state) === 1) {
             return
         }
 
-        var onHide  = this.props.onColumnHide || emptyFn
-        var onShow  = this.props.onColumnShow || emptyFn
+        var onHide = this.props.onColumnHide || emptyFn
+        var onShow = this.props.onColumnShow || emptyFn
 
-        visible?
-            onHide(column):
+        visible ?
+            onHide(column) :
             onShow(column)
 
         var onChange = this.props.onColumnVisibilityChange || emptyFn
 
         onChange(column, !visible)
 
-        if (column.visible == null && column.hidden == null){
+        if (column.visible == null && column.hidden == null) {
             var visibility = this.state.visibility
 
             visibility[column.name] = !visible
@@ -309,7 +312,7 @@ module.exports = React.createClass({
         }
     },
 
-    cleanCache: function() {
+    cleanCache: function () {
         //so grouped rows are re-rendered
         delete this.groupedRows
 
@@ -317,71 +320,72 @@ module.exports = React.createClass({
         this.rowCache = {}
     },
 
-    showMenu: function(menu, state){
+    showMenu: function (menu, state) {
 
         state = state || {}
         state.menu = menu
 
-        if (this.state.menu){
+        if (this.state.menu) {
             this.setState({
                 menu: null,
                 menuColumn: null
             })
         }
 
-        setTimeout(function(){
+        setTimeout(function () {
             //since menu is hidden on click on window,
             //show it in a timeout, after the click event has reached the window
             this.setState(state)
         }.bind(this), 0)
     },
 
-    prepareHeader: function(props, state){
-
+    prepareHeader: function (props, state) {
         var allColumns = props.columns
-        var columns    = getVisibleColumns(props, state)
+        var columns = getVisibleColumns(props, state)
 
         return (props.headerFactory || HeaderFactory)({
-            scrollLeft       : state.scrollLeft,
-            resizing         : state.resizing,
-            columns          : columns,
-            allColumns       : allColumns,
-            columnVisibility : state.visibility,
-            cellPadding      : props.headerPadding || props.cellPadding,
-            filterIconColor  : props.filterIconColor,
-            menuIconColor    : props.menuIconColor,
-            menuIcon    : props.menuIcon,
-            filterIcon    : props.filterIcon,
-            scrollbarSize    : props.scrollbarSize,
-            sortInfo         : props.sortInfo,
-            resizableColumns : props.resizableColumns,
-            reorderColumns   : props.reorderColumns,
+            scrollLeft: state.scrollLeft,
+            resizing: state.resizing,
+            columns: columns,
+            allColumns: allColumns,
+            columnVisibility: state.visibility,
+            cellPadding: props.headerPadding || props.cellPadding,
+            filterIconColor: props.filterIconColor,
+            menuIconColor: props.menuIconColor,
+            menuIcon: props.menuIcon,
+            filterIcon: props.filterIcon,
+            scrollbarSize: props.scrollbarSize,
+            sortInfo: props.sortInfo,
+            resizableColumns: props.resizableColumns,
+            reorderColumns: props.reorderColumns,
             filterable: props.filterable,
-            withColumnMenu   : props.withColumnMenu,
-            sortable         : props.sortable,
+            withColumnMenu: props.withColumnMenu,
+            sortable: props.sortable,
 
-            onDropColumn     : this.onDropColumn,
-            onSortChange     : props.onSortChange,
+            onDropColumn: this.onDropColumn,
+            onSortChange: props.onSortChange,
             onColumnResizeDragStart: this.onColumnResizeDragStart,
             onColumnResizeDrag: this.onColumnResizeDrag,
             onColumnResizeDrop: this.onColumnResizeDrop,
+            handleFilter: props.handleFilter,
+            handleResetFilter: props.handleResetFilter,
 
-            toggleColumn     : this.toggleColumn.bind(this, props),
-            showMenu         : this.showMenu,
-            filterMenuFactory : this.filterMenuFactory,
-            menuColumn       : state.menuColumn,
-            columnMenuFactory: props.columnMenuFactory
-
+            toggleColumn: this.toggleColumn.bind(this, props),
+            showMenu: this.showMenu,
+            filterMenuFactory: this.filterMenuFactory,
+            menuColumn: state.menuColumn,
+            columnMenuFactory: props.columnMenuFactory,
+            handleColumnOrder: props.handleColumnOrder,
         })
     },
 
-    prepareFooter: function(props, state){
+    prepareFooter: function (props, state) {
         return (props.footerFactory || React.DOM.div)({
             className: 'z-footer-wrapper'
         })
     },
 
-    prepareRenderProps: function(props){
+    prepareRenderProps: function (props) {
 
         var result = {}
         var list = {
@@ -389,9 +393,9 @@ module.exports = React.createClass({
             style: true
         }
 
-        Object.keys(props).forEach(function(name){
+        Object.keys(props).forEach(function (name) {
             // if (list[name] || name.indexOf('data-') == 0 || name.indexOf('on') === 0){
-            if (list[name]){
+            if (list[name]) {
                 result[name] = props[name]
             }
         })
@@ -399,56 +403,56 @@ module.exports = React.createClass({
         return result
     },
 
-    render: function(){
+    render: function () {
 
         var props = this.prepareProps(this.props, this.state)
 
         this.p = props
 
-        this.data       = props.data
+        this.data = props.data
         this.dataSource = props.dataSource
 
-        var header      = this.prepareHeader(props, this.state)
-        var wrapper     = this.prepareWrapper(props, this.state)
-        var footer      = this.prepareFooter(props, this.state)
+        var header = this.prepareHeader(props, this.state)
+        var wrapper = this.prepareWrapper(props, this.state)
+        var footer = this.prepareFooter(props, this.state)
         var resizeProxy = this.prepareResizeProxy(props, this.state)
 
         var renderProps = this.prepareRenderProps(props)
 
         var menuProps = {
             columns: props.columns,
-            menu   : this.state.menu
+            menu: this.state.menu
         }
 
         var loadMask
 
-        if (props.loadMaskOverHeader){
-            loadMask = <LoadMask visible={props.loading} />
+        if (props.loadMaskOverHeader) {
+            loadMask = <LoadMask visible={props.loading}/>
         }
 
         var paginationToolbar
 
-        if (props.pagination){
-            var page    = props.page
+        if (props.pagination) {
+            var page = props.page
             var minPage = props.minPage
             var maxPage = props.maxPage
 
             var paginationToolbarFactory = props.paginationFactory || PaginationToolbar
             var paginationProps = assign({
-                dataSourceCount : props.dataSourceCount,
-                page            : page,
-                pageSize        : props.pageSize,
-                minPage         : minPage,
-                maxPage         : maxPage,
-                reload          : this.reload,
-                onPageChange    : this.gotoPage,
+                dataSourceCount: props.dataSourceCount,
+                page: page,
+                pageSize: props.pageSize,
+                minPage: minPage,
+                maxPage: maxPage,
+                reload: this.reload,
+                onPageChange: this.gotoPage,
                 onPageSizeChange: this.setPageSize,
-                border          : props.style.border
+                border: props.style.border
             }, props.paginationToolbarProps)
 
             paginationToolbar = paginationToolbarFactory(paginationProps)
 
-            if (paginationToolbar === undefined){
+            if (paginationToolbar === undefined) {
                 paginationToolbar = PaginationToolbar(paginationProps)
             }
         }
@@ -456,8 +460,8 @@ module.exports = React.createClass({
         var topToolbar
         var bottomToolbar
 
-        if (paginationToolbar){
-            if (paginationToolbar.props.position == 'top'){
+        if (paginationToolbar) {
+            if (paginationToolbar.props.position == 'top') {
                 topToolbar = paginationToolbar
             } else {
                 bottomToolbar = paginationToolbar
@@ -483,11 +487,11 @@ module.exports = React.createClass({
         return result
     },
 
-    getTableProps: function(props, state){
+    getTableProps: function (props, state) {
         var table
         var rows
 
-        if (props.groupBy){
+        if (props.groupBy) {
             rows = this.groupedRows = this.groupedRows || getGroupedRows(props, state.groupData)
             rows = slice(rows, props)
         }
@@ -497,47 +501,47 @@ module.exports = React.createClass({
         return table
     },
 
-    handleVerticalScrollOverflow: function(sign, scrollTop) {
+    handleVerticalScrollOverflow: function (sign, scrollTop) {
 
         var props = this.p
-        var page  = props.page
+        var page = props.page
 
-        if (this.isValidPage(page + sign, props)){
+        if (this.isValidPage(page + sign, props)) {
             this.gotoPage(page + sign)
         }
     },
 
-    fixHorizontalScrollbar: function() {
+    fixHorizontalScrollbar: function () {
         var scroller = this.scroller
 
-        if (scroller){
+        if (scroller) {
             scroller.fixHorizontalScrollbar()
         }
     },
 
-    onWrapperMount: function(wrapper, scroller){
+    onWrapperMount: function (wrapper, scroller) {
         this.scroller = scroller
     },
 
-    prepareWrapper: function(props, state){
+    prepareWrapper: function (props, state) {
         var virtualRendering = props.virtualRendering
 
-        var data       = props.data
-        var scrollTop  = state.scrollTop
+        var data = props.data
+        var scrollTop = state.scrollTop
         var startIndex = state.startIndex
-        var endIndex   = virtualRendering?
-                            this.getRenderEndIndex(props, state):
-                            0
+        var endIndex = virtualRendering ?
+            this.getRenderEndIndex(props, state) :
+            0
 
-        var renderCount = virtualRendering?
-                            endIndex + 1 - startIndex:
-                            data.length
+        var renderCount = virtualRendering ?
+        endIndex + 1 - startIndex :
+            data.length
 
-        var totalLength = state.groupData?
-                            data.length + state.groupData.groupsCount:
-                            data.length
+        var totalLength = state.groupData ?
+            state.groupData.collapsedLength :
+            data.length
 
-        if (props.virtualRendering){
+        if (props.virtualRendering) {
             scrollTop = startIndex * props.rowHeight
         }
 
@@ -563,25 +567,26 @@ module.exports = React.createClass({
         // }
 
         var wrapperProps = assign({
-            ref             : 'wrapper',
-            onMount         : this.onWrapperMount,
-            scrollLeft      : state.scrollLeft,
-            scrollTop       : scrollTop,
-            topOffset       : state.topOffset,
-            startIndex      : startIndex,
-            totalLength     : totalLength,
-            renderCount     : renderCount,
-            endIndex        : endIndex,
+            ref: 'wrapper',
+            onMount: this.onWrapperMount,
+            scrollLeft: state.scrollLeft,
+            scrollTop: scrollTop,
+            topOffset: state.topOffset,
+            startIndex: startIndex,
+            totalLength: totalLength,
+            renderCount: renderCount,
+            endIndex: endIndex,
 
-            allColumns      : props.columns,
+            allColumns: props.columns,
 
-            onScrollLeft    : this.handleScrollLeft,
-            onScrollTop     : this.handleScrollTop,
+            onScrollLeft: this.handleScrollLeft,
+            onScrollTop: this.handleScrollTop,
+            onToggleGroup: this.handleToggleGroup,
             // onScrollOverflow: props.virtualPagination? this.handleVerticalScrollOverflow: null,
 
-            menu            : state.menu,
-            menuColumn      : state.menuColumn,
-            showMenu        : this.showMenu,
+            menu: state.menu,
+            menuColumn: state.menuColumn,
+            showMenu: this.showMenu,
 
             // cellFactory     : props.cellFactory,
             // rowStyle        : props.rowStyle,
@@ -593,33 +598,37 @@ module.exports = React.createClass({
             // loadersSize: loadersSize,
 
             // onRowClick: this.handleRowClick,
-            selected        : props.selected == null?
-                state.defaultSelected:
+            selected: props.selected == null ?
+                state.defaultSelected :
                 props.selected
         }, props)
 
-        wrapperProps.columns    = getVisibleColumns(props, state)
+        wrapperProps.columns = getVisibleColumns(props, state)
         wrapperProps.tableProps = this.getTableProps(wrapperProps, state)
 
         return (props.WrapperFactory || WrapperFactory)(wrapperProps)
 
     },
 
-    handleRowClick: function(rowProps, event){
-        if (this.props.onRowClick){
+    handleRowClick: function (rowProps, event) {
+        if (this.props.onRowClick) {
             this.props.onRowClick(rowProps.data, rowProps, event)
         }
 
         this.handleSelection(rowProps, event)
     },
 
-    prepareProps: function(thisProps, state){
+    handleToggleGroup: function handleToggleGroup(toggleGroupInfo) {
+        this.groupData(this.props, toggleGroupInfo);
+    },
+    
+    prepareProps: function (thisProps, state) {
         var props = assign({}, thisProps)
 
-        props.loading    = this.prepareLoading(props)
-        props.data       = this.prepareData(props)
+        props.loading = this.prepareLoading(props)
+        props.data = this.prepareData(props)
         props.dataSource = this.prepareDataSource(props)
-        props.empty      = !props.data.length
+        props.empty = !props.data.length
 
         props.rowHeight = this.prepareRowHeight(props)
         props.virtualRendering = this.isVirtualRendering(props)
@@ -639,41 +648,41 @@ module.exports = React.createClass({
         return props
     },
 
-    prepareLoading: function(props) {
+    prepareLoading: function (props) {
         var showLoadMask = props.showLoadMask || !this.isMounted() //ismounted check for initial load
-        return props.loading == null? showLoadMask && this.state.defaultLoading: props.loading
+        return props.loading == null ? showLoadMask && this.state.defaultLoading : props.loading
     },
 
-    preparePaging: function(props, state) {
+    preparePaging: function (props, state) {
         props.pagination = this.preparePagination(props)
 
-        if (props.pagination){
+        if (props.pagination) {
             props.pageSize = this.preparePageSize(props)
             props.dataSourceCount = this.prepareDataSourceCount(props)
 
             props.minPage = 1
             props.maxPage = Math.ceil((props.dataSourceCount || 1) / props.pageSize)
-            props.page    = clamp(this.preparePage(props), props.minPage, props.maxPage)
+            props.page = clamp(this.preparePage(props), props.minPage, props.maxPage)
         }
     },
 
-    preparePagination: function(props) {
-        return props.pagination === false?
-                false:
-                !!props.pageSize || !!props.paginationFactory || this.isRemoteDataSource(props)
+    preparePagination: function (props) {
+        return props.pagination === false ?
+            false :
+        !!props.pageSize || !!props.paginationFactory || this.isRemoteDataSource(props)
     },
 
-    prepareDataSourceCount: function(props) {
-        return props.dataSourceCount == null? this.state.defaultDataSourceCount: props.dataSourceCount
+    prepareDataSourceCount: function (props) {
+        return props.dataSourceCount == null ? this.state.defaultDataSourceCount : props.dataSourceCount
     },
 
-    preparePageSize: function(props) {
-        return props.pageSize == null? this.state.defaultPageSize: props.pageSize
+    preparePageSize: function (props) {
+        return props.pageSize == null ? this.state.defaultPageSize : props.pageSize
     },
 
-    preparePage: function(props) {
-        return props.page == null?
-            this.state.defaultPage:
+    preparePage: function (props) {
+        return props.page == null ?
+            this.state.defaultPage :
             props.page
     },
     /**
@@ -683,151 +692,310 @@ module.exports = React.createClass({
      * @param  {Object}  [props] Optional. If not given, this.props will be used
      * @return {Boolean}
      */
-    isRemoteDataSource: function(props) {
+    isRemoteDataSource: function (props) {
         props = props || this.props
 
         return props.dataSource && !isArray(props.dataSource)
     },
 
-    prepareDataSource: function(props) {
+    prepareDataSource: function (props) {
         var dataSource = props.dataSource
 
-        if (isArray(dataSource)){
+        if (isArray(dataSource)) {
             dataSource = null
         }
 
         return dataSource
     },
 
-    prepareData: function(props) {
+    prepareData: function (props) {
 
         var data = null
 
-        if (isArray(props.data)){
+        if (isArray(props.data)) {
             data = props.data
         }
 
-        if (isArray(props.dataSource)){
+        if (isArray(props.dataSource)) {
             data = props.dataSource
         }
 
-        data = data == null? this.state.defaultData: data
+        data = data == null ? this.state.defaultData : data
 
-        if (!isArray(data)){
+        if (!isArray(data)) {
             data = []
         }
 
         return data
     },
 
-    prepareFilterable: function(props) {
-        if (props.filterable === false){
+    prepareFilterable: function (props) {
+        if (props.filterable === false) {
             return false
         }
 
         return props.filterable || !!props.onFilter
     },
 
-    prepareResizableColumns: function(props) {
-        if (props.resizableColumns === false){
+    prepareResizableColumns: function (props) {
+        if (props.resizableColumns === false) {
             return false
         }
 
         return props.resizableColumns || !!props.onColumnResize
     },
 
-    prepareReorderColumns: function(props) {
-        if (props.reorderColumns === false){
+    prepareReorderColumns: function (props) {
+        if (props.reorderColumns === false) {
             return false
         }
 
         return props.reorderColumns || !!props.onColumnOrderChange
     },
 
-    isVirtualRendering: function(props){
+    isVirtualRendering: function (props) {
         props = props || this.props
 
         return props.virtualRendering || (props.rowHeight != null)
     },
 
-    prepareRowHeight: function(){
-        return this.props.rowHeight == null? this.state.rowHeight: this.props.rowHeight
+    prepareRowHeight: function () {
+        return this.props.rowHeight == null ? this.state.rowHeight : this.props.rowHeight
     },
 
-    groupData: function(props){
-        if (props.groupBy){
-            var data = this.prepareData(props)
+    groupData: function groupData(props, toggleGroupInfo) {
+        if (props.groupBy) {
+            var groupInfo = this.state.groupInfo;
+            var data = this.prepareData(props);
+            
+            if(!this.arraysEqual(props.groupBy, this.state.groupBy)){
+                groupInfo = null;
+            }
+            
+            if (!groupInfo) {
+                groupInfo = group(data, props.groupBy);
+                groupInfo = this.prepareGroupInfo(groupInfo);
+            } else {
+                groupInfo = this.toggleGroup(groupInfo, toggleGroupInfo);
+            }
 
+            var groupData = group(data, props.groupBy);
+            groupData = this.collapseGroups(groupData, groupInfo);
+            groupData.collapsedLength = this.getGroupDataLength(groupData);
+            
             this.setState({
-                groupData: group(data, props.groupBy)
-            })
+                groupData: groupData,
+                groupInfo: groupInfo,
+                groupBy: props.groupBy
+            });
 
-            delete this.groupedRows
+            delete this.groupedRows;
         }
     },
 
-    isValidPage: function(page, props) {
+    prepareGroupInfo: function prepareGroupInfo(groupData) {
+        var groupInfo = [];
+        
+        if (Array.isArray(groupData.data))
+            return groupInfo;
+
+        this.appendGroupInfo(groupData.data, groupInfo);
+        return groupInfo;
+    },
+    
+    appendGroupInfo: function appendGroupInfo(data, groupInfo) {
+        for (var key in data) {
+            var value = data[key];
+            groupInfo.push({
+                name: value.name,
+                value: value.value,
+                depth: value.depth,
+                valuePath: value.valuePath,
+                collapsed: true
+            });
+        }
+        
+        for (var key in data) {
+            var value = data[key];
+            
+            if (!Array.isArray(value.data))
+                this.appendGroupInfo(value.data, groupInfo);
+        }
+    },
+    
+    toggleGroup: function toggleGroup(groupInfo, toggleGroupInfo) {
+        if (!toggleGroupInfo) {
+            return groupInfo;
+        }
+
+        var newGroupInfo = [];
+        
+        for (var i = 0; i < groupInfo.length; i++) {
+            newGroupInfo.push(assign({}, groupInfo[i]));
+        }
+        
+        for (var i = 0; i < newGroupInfo.length; i++) {
+            var a = newGroupInfo[i].name === toggleGroupInfo.name;
+            var b = newGroupInfo[i].value === toggleGroupInfo.value;
+            var c = newGroupInfo[i].depth === toggleGroupInfo.depth;
+            var d = this.arraysEqual(newGroupInfo[i].valuePath, toggleGroupInfo.valuePath);
+            
+            if (a && b && c && d) {
+                newGroupInfo[i].collapsed = !newGroupInfo[i].collapsed;
+            }
+        }
+        
+        return newGroupInfo;
+    },
+
+    arraysEqual: function arraysEqual(arr1, arr2) {
+        if (!arr1 || !arr2)
+            return false;
+
+        if (arr1.length != arr2.length)
+            return false;
+
+        for (var i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i])
+                return false;
+        }
+        
+        return true;
+    },
+    
+    collapseGroups: function collapseGroups(groupData, groupInfo) {
+        if (Array.isArray(groupData.data))
+            return groupData;
+        
+        this.collapseData(groupData.data, groupInfo);
+        return groupData;
+    },
+    
+    collapseData: function collapseData(data, groupInfo) {
+        for (var key in data) {
+            var value = data[key];
+            
+            if (this.isCollapsedGroup(value, groupInfo)) {
+                value.data = [];
+                value.keys = [];
+            }
+        }
+        
+        for (var key in data) {
+            var value = data[key];
+            
+            if (!Array.isArray(value.data))
+                this.collapseData(value.data, groupInfo);
+        }
+    },
+    
+    isCollapsedGroup: function isCollapsedGroup(value, groupInfo) {
+        if (!groupInfo || !groupInfo.length) {
+            return false;
+        }
+
+        for (var i = 0; i < groupInfo.length; i++) {
+            var a = value.name === groupInfo[i].name;
+            var b = value.value === groupInfo[i].value;
+            var c = value.depth === groupInfo[i].depth;
+            var d = this.arraysEqual(value.valuePath, groupInfo[i].valuePath);
+            
+            if (a && b && c && d)
+                return groupInfo[i].collapsed;
+        }
+        
+        return false;
+    },
+    
+    getGroupDataLength: function getGroupDataLength(groupData) {
+        if (Array.isArray(groupData.data))
+            return groupData.length;
+
+        var len = {
+            length: 0
+        };
+        
+        this.updateGroupDataLength(groupData.data, len);
+        return len.length;
+    },
+    
+    updateGroupDataLength: function updateGroupDataLength(data, len) {
+        for (var key in data) {
+            len.length += 1;
+        }
+        
+        for (var key in data) {
+            var value = data[key];
+            
+            if (!Array.isArray(value.data))
+                this.updateGroupDataLength(value.data, len);
+            else
+                len.length += value.data.length;
+        }
+    },
+    
+    isValidPage: function (page, props) {
         return page >= 1 && page <= this.getMaxPage(props)
     },
 
-    getMaxPage: function(props) {
+    getMaxPage: function (props) {
         props = props || this.props
 
-        var count    = this.prepareDataSourceCount(props) || 1
+        var count = this.prepareDataSourceCount(props) || 1
         var pageSize = this.preparePageSize(props)
 
         return Math.ceil(count / pageSize)
     },
 
-    reload: function() {
-        if (this.dataSource){
+    reload: function () {
+        if (this.dataSource) {
             return this.loadDataSource(this.dataSource, this.props)
         }
     },
 
-    clampPage: function(page) {
+    clampPage: function (page) {
         return clamp(page, 1, this.getMaxPage(this.props))
     },
 
-    setPageSize: function(pageSize) {
+    setPageSize: function (pageSize) {
 
         var stateful
         var newPage = this.preparePage(this.props)
         var newState = {}
 
-        if (typeof this.props.onPageSizeChange == 'function'){
+        if (typeof this.props.onPageSizeChange == 'function') {
             this.props.onPageSizeChange(pageSize, this.p)
         }
 
-        if (this.props.pageSize == null){
+        if (this.props.pageSize == null) {
             stateful = true
             this.state.defaultPageSize = pageSize
             newState.defaultPageSize = pageSize
         }
 
-        if (!this.isValidPage(newPage, this.props)){
+        if (!this.isValidPage(newPage, this.props)) {
 
             newPage = this.clampPage(newPage)
 
-            if (typeof this.props.onPageChange == 'function'){
+            if (typeof this.props.onPageChange == 'function') {
                 this.props.onPageChange(newPage)
             }
 
-            if (this.props.page == null){
+            if (this.props.page == null) {
                 stateful = true
                 this.state.defaultPage = newPage
-                newState.defaultPage   = newPage
+                newState.defaultPage = newPage
             }
         }
 
-        if (stateful){
+        if (stateful) {
             this.reload()
             this.setState(newState)
         }
     },
 
-    gotoPage: function(page) {
-        if (typeof this.props.onPageChange == 'function'){
+    gotoPage: function (page) {
+        if (typeof this.props.onPageChange == 'function') {
             this.props.onPageChange(page)
         } else {
             this.state.defaultPage = page
@@ -846,16 +1014,16 @@ module.exports = React.createClass({
      * @param  {String/Function/Promise} [dataSource]
      * @param  {Object} [props]
      */
-    loadDataSource: function(dataSource, props) {
+    loadDataSource: function (dataSource, props) {
         props = props || this.props
 
-        if (!arguments.length){
+        if (!arguments.length) {
             dataSource = props.dataSource
         }
 
         var dataSourceQuery = {}
 
-        if (props.sortInfo){
+        if (props.sortInfo) {
             dataSourceQuery.sortInfo = props.sortInfo
         }
 
@@ -863,47 +1031,47 @@ module.exports = React.createClass({
         var pageSize
         var page
 
-        if (pagination){
+        if (pagination) {
             pageSize = this.preparePageSize(props)
-            page     = this.preparePage(props)
+            page = this.preparePage(props)
 
             assign(dataSourceQuery, {
                 pageSize: pageSize,
-                page    : page,
-                skip    : (page - 1) * pageSize
+                page: page,
+                skip: (page - 1) * pageSize
             })
         }
 
-        if (typeof dataSource == 'function'){
+        if (typeof dataSource == 'function') {
             dataSource = dataSource(dataSourceQuery, props)
         }
 
-        if (typeof dataSource == 'string'){
+        if (typeof dataSource == 'string') {
             var fetch = this.props.fetch || global.fetch
 
             var keys = Object.keys(dataSourceQuery)
-            if (props.appendDataSourceQueryParams && keys.length){
+            if (props.appendDataSourceQueryParams && keys.length) {
                 //dataSource was initially passed as a string
                 //so we append quey params
-                dataSource += '?' + keys.map(function(param){
-                    return param + '=' + JSON.stringify(dataSourceQuery[param])
-                }).join('&')
+                dataSource += '?' + keys.map(function (param) {
+                        return param + '=' + JSON.stringify(dataSourceQuery[param])
+                    }).join('&')
             }
 
             dataSource = fetch(dataSource)
         }
 
-        if (dataSource && dataSource.then){
+        if (dataSource && dataSource.then) {
 
-            if (props.onDataSourceResponse){
+            if (props.onDataSourceResponse) {
                 dataSource.then(props.onDataSourceResponse, props.onDataSourceResponse)
             } else {
                 this.setState({
                     defaultLoading: true
                 })
 
-                var errorFn = function(err){
-                    if (props.onDataSourceError){
+                var errorFn = function (err) {
+                    if (props.onDataSourceError) {
                         props.onDataSourceError(err)
                     }
 
@@ -912,17 +1080,17 @@ module.exports = React.createClass({
                     })
                 }.bind(this)
 
-                var noCatchFn = dataSource['catch']? null: errorFn
+                var noCatchFn = dataSource['catch'] ? null : errorFn
 
                 dataSource = dataSource
-                    .then(function(response){
-                        return response && typeof response.json == 'function'?
-                                    response.json():
-                                    response
+                    .then(function (response) {
+                        return response && typeof response.json == 'function' ?
+                            response.json() :
+                            response
                     })
-                    .then(function(json){
+                    .then(function (json) {
 
-                        if (props.onDataSourceSuccess){
+                        if (props.onDataSourceSuccess) {
                             props.onDataSourceSuccess(json)
                             this.setState({
                                 defaultLoading: false
@@ -931,20 +1099,20 @@ module.exports = React.createClass({
                         }
 
                         var info
-                        if (typeof props.getDataSourceInfo == 'function'){
+                        if (typeof props.getDataSourceInfo == 'function') {
                             info = props.getDataSourceInfo(json)
                         }
 
-                        var data = info?
-                            info.data:
-                            Array.isArray(json)?
-                                json:
+                        var data = info ?
+                            info.data :
+                            Array.isArray(json) ?
+                                json :
                                 json.data
 
-                        var count = info?
-                            info.count:
-                            json.count != null?
-                                json.count:
+                        var count = info ?
+                            info.count :
+                            json.count != null ?
+                                json.count :
                                 null
 
 
@@ -952,24 +1120,24 @@ module.exports = React.createClass({
                             defaultData: data,
                             defaultLoading: false
                         }
-                        if (props.groupBy){
+                        if (props.groupBy) {
                             newState.groupData = group(data, props.groupBy)
                             delete this.groupedRows
                         }
 
-                        if (count != null){
+                        if (count != null) {
                             newState.defaultDataSourceCount = count
                         }
 
                         this.setState(newState)
                     }.bind(this), noCatchFn)
 
-                if (dataSource['catch']){
+                if (dataSource['catch']) {
                     dataSource['catch'](errorFn)
                 }
             }
 
-            if (props.onDataSourceLoaded){
+            if (props.onDataSourceLoaded) {
                 dataSource.then(props.onDataSourceLoaded)
             }
         }
@@ -977,30 +1145,30 @@ module.exports = React.createClass({
         return dataSource
     },
 
-    componentWillMount: function(){
+    componentWillMount: function () {
         this.rowCache = {}
         this.groupData(this.props)
 
-        if (this.isRemoteDataSource(this.props)){
+        if (this.isRemoteDataSource(this.props)) {
             this.loadDataSource(this.props.dataSource, this.props)
         }
     },
 
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps: function (nextProps) {
         this.rowCache = {}
         this.groupData(nextProps)
 
-        if (this.isRemoteDataSource(nextProps)){
-            var otherPage     = this.props.page != nextProps.page
+        if (this.isRemoteDataSource(nextProps)) {
+            var otherPage = this.props.page != nextProps.page
             var otherPageSize = this.props.pageSize != nextProps.pageSize
 
-            if (nextProps.reload || otherPage || otherPageSize){
+            if (nextProps.reload || otherPage || otherPageSize) {
                 this.loadDataSource(nextProps.dataSource, nextProps)
             }
         }
     },
 
-    prepareStyle: function(props){
+    prepareStyle: function (props) {
         var style = {}
 
         assign(style, props.defaultStyle, props.style)
@@ -1008,32 +1176,32 @@ module.exports = React.createClass({
         return style
     },
 
-    prepareClassName: function(props){
+    prepareClassName: function (props) {
         props.className = props.className || ''
         props.className += ' ' + props.defaultClassName
 
-        if (props.cellEllipsis){
+        if (props.cellEllipsis) {
             props.className += ' ' + props.cellEllipsisCls
         }
 
-        if (props.styleAlternateRows){
+        if (props.styleAlternateRows) {
             props.className += ' ' + props.styleAlternateRowsCls
         }
 
-        if (props.showCellBorders){
-            var cellBordersCls = props.showCellBorders === true?
-            props.showCellBordersCls + '-horizontal ' + props.showCellBordersCls + '-vertical':
+        if (props.showCellBorders) {
+            var cellBordersCls = props.showCellBorders === true ?
+            props.showCellBordersCls + '-horizontal ' + props.showCellBordersCls + '-vertical' :
             props.showCellBordersCls + '-' + props.showCellBorders
 
             props.className += ' ' + cellBordersCls
 
         }
 
-        if (props.withColumnMenu){
+        if (props.withColumnMenu) {
             props.className += ' ' + props.withColumnMenuCls
         }
 
-        if (props.empty){
+        if (props.empty) {
             props.className += ' ' + props.emptyCls
         }
     },
@@ -1043,8 +1211,8 @@ module.exports = React.createClass({
     /// Code dealing with preparing columns
     ///
     ///////////////////////////////////////
-    prepareColumns: function(props, state){
-        props.columns = props.columns.map(function(col, index){
+    prepareColumns: function (props, state) {
+        props.columns = props.columns.map(function (col, index) {
             col = Column(col, props)
             col.index = index
             return col
@@ -1055,55 +1223,55 @@ module.exports = React.createClass({
         props.columns.forEach(this.prepareColumnStyle.bind(this, props))
     },
 
-    prepareColumnStyle: function(props, column){
+    prepareColumnStyle: function (props, column) {
         var style = column.sizeStyle = {}
 
-        column.style     = assign({}, column.style)
+        column.style = assign({}, column.style)
         column.textAlign = column.textAlign || column.style.textAlign
 
         var minWidth = column.minWidth || props.columnMinWidth
 
         style.minWidth = minWidth
 
-        if (column.flexible){
+        if (column.flexible) {
             style.flex = column.flex || 1
         } else {
-            style.width    = column.width
+            style.width = column.width
             style.minWidth = column.width
         }
     },
 
-    prepareColumnSizes: function(props, state){
+    prepareColumnSizes: function (props, state) {
 
         var visibleColumns = getVisibleColumns(props, state)
-        var totalWidth     = 0
-        var flexCount      = 0
+        var totalWidth = 0
+        var flexCount = 0
 
-        visibleColumns.forEach(function(column){
+        visibleColumns.forEach(function (column) {
             column.minWidth = column.minWidth || props.columnMinWidth
 
-            if (!column.flexible){
+            if (!column.flexible) {
                 totalWidth += column.width
                 return 0
-            } else if (column.minWidth){
+            } else if (column.minWidth) {
                 totalWidth += column.minWidth
             }
 
             flexCount++
         }, this)
 
-        props.columnFlexCount  = flexCount
+        props.columnFlexCount = flexCount
         props.totalColumnWidth = totalWidth
     },
 
-    prepareResizeProxy: function(props, state){
+    prepareResizeProxy: function (props, state) {
         return <ResizeProxy ref="resizeProxy" active={state.resizing}/>
     },
 
-    onColumnResizeDragStart: function(config){
+    onColumnResizeDragStart: function (config) {
 
         var domNode = findDOMNode(this)
-        var region  = Region.from(domNode)
+        var region = Region.from(domNode)
 
         this.resizeProxyLeft = config.resizeProxyLeft - region.left
 
@@ -1114,49 +1282,49 @@ module.exports = React.createClass({
 
     },
 
-    onColumnResizeDrag: function(config){
+    onColumnResizeDrag: function (config) {
         this.refs.resizeProxy.setState({
             offset: this.resizeProxyLeft + config.resizeProxyDiff
         })
     },
 
-    onColumnResizeDrop: function(config, resizeInfo){
+    onColumnResizeDrop: function (config, resizeInfo) {
 
         var horizScrollbar = this.refs.wrapper.refs.horizScrollbar
 
-        if (horizScrollbar && this.state.scrollLeft){
+        if (horizScrollbar && this.state.scrollLeft) {
 
-            setTimeout(function(){
+            setTimeout(function () {
                 //FF needs this, since it does not trigger scroll event when scrollbar dissapears
                 //so we might end up with grid content not visible (to the left)
 
                 var domNode = findDOMNode(horizScrollbar)
-                if (domNode && !domNode.scrollLeft){
+                if (domNode && !domNode.scrollLeft) {
                     this.handleScrollLeft(0)
                 }
             }.bind(this), 1)
 
         }
 
-        var props   = this.props
+        var props = this.props
         var columns = props.columns
 
         var onColumnResize = props.onColumnResize || emptyFn
         var first = resizeInfo[0]
 
-        var firstCol  = findColumn(columns, first.name)
+        var firstCol = findColumn(columns, first.name)
         var firstSize = first.size
 
         var second = resizeInfo[1]
-        var secondCol = second? findColumn(columns, second.name): undefined
-        var secondSize = second? second.size: undefined
+        var secondCol = second ? findColumn(columns, second.name) : undefined
+        var secondSize = second ? second.size : undefined
 
         //if defaultWidth specified, update it
-        if (firstCol.width == null && firstCol.defaultWidth){
+        if (firstCol.width == null && firstCol.defaultWidth) {
             firstCol.defaultWidth = firstSize
         }
 
-        if (secondCol && secondCol.width == null && secondCol.defaultWidth){
+        if (secondCol && secondCol.width == null && secondCol.defaultWidth) {
             secondCol.defaultWidth = secondSize
         }
 

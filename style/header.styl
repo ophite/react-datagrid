@@ -1,5 +1,6 @@
 .react-datagrid
     .z-header-menu-column
+        border-color $datagrid-header-border-color !important
         background white
         position absolute
         top 0px
@@ -7,6 +8,12 @@
         .menu-row
             touch-callout none
             user-select none
+
+            > td
+                padding 10px !important
+
+                &:last-child
+                    padding-right 15px !important
 
         //     &:before
         //         visibility hidden
@@ -18,7 +25,8 @@
         //     &:before
         //         visibility visible
         .menu-row.over
-            background $datagrid-row-over-background
+            background $datagrid-row-over-background !important
+            color #000 !important
 
     .z-header
         align-items stretch /* for vertical aligning text in header */
@@ -78,8 +86,10 @@
             &.z-filterable .z-show-filter.z-active
             &.z-filterable .z-show-filter:hover
             .z-show-menu.z-active
-            .z-show-menu:hover
                 background $datagrid-column-menu-icon-hover-background
+
+            .z-show-menu:hover
+                background: none
 
             &.z-active .z-show-menu
             &.z-active.z-filterable .z-show-filter
@@ -94,8 +104,10 @@
     //styles for column headers
     .z-header-wrapper
         flex 0 0 auto
-        background $datagrid-header-background
+        background $datagrid-header-background !important
         border-bottom $datagrid-header-border-width $datagrid-header-border-style $datagrid-header-border-color
+        position relative
+        z-index 100
 
         &.z-dragging
             .z-column-header:not(.z-drag)
@@ -104,6 +116,7 @@
     .z-column-header
         position relative
         font-weight $datagrid-column-header-font-weight
+        border-right 1px solid rgba(0,0,0,0.12)
 
         .z-inner
 
@@ -121,6 +134,12 @@
             text-overflow ellipsis
             white-space nowrap
             overflow hidden
+            color #fff
+
+            &.column-drag-hover
+                background #c6cf5f
+                color #000
+
 
         &.z-sortable
             .z-inner
@@ -177,3 +196,31 @@
 
     .z-header .z-column-header.z-cell.z-last
         border-right $datagrid-header-border-width $datagrid-header-border-style $datagrid-header-border-color
+
+    .z-show-menu
+        svg
+            padding 0 5px !important
+            position relative
+            top 3px
+
+        polygon
+            fill #fff !important
+
+    .z-field-wrap
+        padding 0 22px 18px 18px
+
+    .z-field
+        border .1px solid $datagrid-header-border-color
+        font-weight: normal
+        margin-top: -5px
+        outline none
+        padding: 5px
+        width: 100%
+
+    .grid-menu
+        display flex
+        align-items center
+
+        > div
+            display inline-flex
+

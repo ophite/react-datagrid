@@ -110,7 +110,10 @@ module.exports = React.createClass({
 
             shiftSize : null,
             dragColumn: null,
-            shiftIndexes: null
+            shiftIndexes: null,
+
+            isFilterMode: false,
+            filterValues: {},
         }
     },
 
@@ -155,13 +158,14 @@ module.exports = React.createClass({
             <div style={style} className={props.className}>
                 <div className='z-header' style={headerStyle}>
                     {cells}
+                    {<button onClick={this.toggleFilter}>{!state.isFilterMode ?  'Show Filter' : 'Hide filter'}</button>}
+                    {state.isFilterMode ? <button onClick={this.resetFilter}>Reset filter</button> : null}
                 </div>
             </div>
         )
     },
 
     renderCell: function(props, state, column, index){
-
         var resizing  = props.resizing
         var text      = column.title
         var className = props.cellClassName || ''
@@ -247,8 +251,25 @@ module.exports = React.createClass({
                 {filter}
                 {menu}
                 {resizer}
+                {
+                    state.isFilterMode 
+                        ? <input 
+                            onChange={this.handleFilter.bind(this, props, column)} 
+                            value={state.filterValues[column.name] || ''}
+                          /> 
+                        : null
+                }
             </Cell>
         )
+    },
+
+    resetFilter: function() {
+        this.setState({ filterValues: {} });
+        this.props.handleResetFilter();
+    },
+
+    toggleFilter: function() {
+        this.setState({ isFilterMode: !this.state.isFilterMode});
     },
 
     toggleSort: function(column){
@@ -295,6 +316,14 @@ module.exports = React.createClass({
         return <div className="z-show-menu" onMouseUp={this.handleShowMenuMouseUp.bind(this, props, column, index)}>
             {menuIcon}
         </div>
+    },
+
+    handleFilter: function(props, column, event) {
+        var filterValues = JSON.parse(JSON.stringify(this.state.filterValues));
+        filterValues[column.name] = event.target.value;
+
+        this.setState({ filterValues });
+        props.handleFilter(column, event, filterValues);
     },
 
     handleShowMenuMouseUp: function(props, column, index, event){
@@ -424,8 +453,8 @@ module.exports = React.createClass({
         if (event && event.nativeEvent && event.nativeEvent.stopSort){
             return
         }
-
-        if (column.sortable){
+        
+        if (column.sortable && event.target.tagName !== "INPUT"){
             this.toggleSort(column)
         }
     },

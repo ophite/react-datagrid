@@ -2,19 +2,19 @@
 
 var React = require('react')
 
-var Row         = require('../Row')
-var Cell        = require('../Cell')
+var Row = require('../Row')
+var Cell = require('../Cell')
 var CellFactory = React.createFactory(Cell)
 
 var renderRow = require('./renderRow')
 
-function renderData(props, data, depth){
+function renderData(props, data, depth) {
 
-    return data.map(function(data, index){
+    return data.map(function (data, index) {
 
-        return renderRow(props, data, index, function(config){
-            config.cellFactory = function(cellProps){
-                if (cellProps.index === 0){
+        return renderRow(props, data, index, function (config) {
+            config.cellFactory = function (cellProps) {
+                if (cellProps.index === 0) {
                     cellProps.style.paddingLeft = depth * props.groupNestingWidth
                 }
 
@@ -28,16 +28,57 @@ function renderData(props, data, depth){
     })
 }
 
-function renderGroupRow(props, groupData){
+const isEmpty = (val) => {
+    let empty = true;
 
+    if (!val && val !== 0) {
+        empty = true;
+    }
 
+    if (typeof val === 'number') {
+        empty = false;
+    }
+
+    if (typeof val === 'string') {
+        empty = !val.trim();
+    }
+
+    if (typeof val === 'object' && val) {
+        empty = !Object.keys(val).length;
+    }
+
+    if (Array.isArray(val)) {
+        empty = !val.length;
+    }
+
+    return empty;
+};
+
+function renderGroupRow(props, groupData) {
     var cellStyle = {
         minWidth: props.totalColumnWidth,
         paddingLeft: (groupData.depth - 1) * props.groupNestingWidth
-    }
+    };
 
+    var toggleGroupInfo = {
+        name: groupData.name,
+        value: groupData.value,
+        depth: groupData.depth,
+        valuePath: groupData.valuePath
+    };
 
-    return <Row className='z-group-row' key={'group-'+groupData.valuePath} rowHeight={props.rowHeight}>
+    // check if group row is collapsed or expand - add plus, minus icon through "open" className
+    const isExpanded = Array.isArray(groupData.data) && groupData.data.length ||
+        typeof groupData.data === 'object' && !isEmpty(groupData.data);
+    const className = 'z-group-row' + ( isExpanded ? ' open' : '');
+
+    return <Row
+        className={className}
+        key={'group-'+groupData.valuePath}
+        rowHeight={props.rowHeight}
+        onToggleGroup={props.onToggleGroup}
+        toggleGroupInfo={toggleGroupInfo}
+    >
         <Cell
             className='z-group-cell'
             contentPadding={props.cellPadding}
@@ -47,14 +88,14 @@ function renderGroupRow(props, groupData){
     </Row>
 }
 
-function renderGroup(props, groupData){
+function renderGroup(props, groupData) {
 
     var result = [renderGroupRow(props, groupData)]
 
-    if (groupData && groupData.leaf){
+    if (groupData && groupData.leaf) {
         result.push.apply(result, renderData(props, groupData.data, groupData.depth))
     } else {
-        groupData.keys.forEach(function(key){
+        groupData.keys.forEach(function (key) {
             var items = renderGroup(props, groupData.data[key])
             result.push.apply(result, items)
         })
@@ -63,16 +104,16 @@ function renderGroup(props, groupData){
     return result
 }
 
-function renderGroups(props, groupsData){
+function renderGroups(props, groupsData) {
     var result = []
 
-    groupsData.keys.map(function(key){
+    groupsData.keys.map(function (key) {
         result.push.apply(result, renderGroup(props, groupsData.data[key]))
     })
 
     return result
 }
 
-module.exports = function(props, groupData){
+module.exports = function (props, groupData) {
     return renderGroups(props, groupData)
 }
