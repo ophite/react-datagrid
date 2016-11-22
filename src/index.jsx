@@ -768,8 +768,16 @@ module.exports = React.createClass({
             var groupInfo = this.state.groupInfo;
             var data = this.prepareData(props);
             
+            var startIndex = this.state.startIndex;
+            var scrollLeft = this.state.scrollLeft;
+            var scrollTop = this.state.scrollTop;        
+            
             if(!this.arraysEqual(props.groupBy, this.state.groupBy)){
                 groupInfo = null;
+                
+                startIndex = 0;
+                scrollLeft = 0;
+                scrollTop = 0;
             }
             
             if (!groupInfo) {
@@ -784,12 +792,27 @@ module.exports = React.createClass({
             groupData.collapsedLength = this.getGroupDataLength(groupData);
             
             this.setState({
+                ... this.state,
                 groupData: groupData,
                 groupInfo: groupInfo,
-                groupBy: props.groupBy
+                groupBy: props.groupBy,
+                
+                startIndex: startIndex,
+                scrollLeft: scrollLeft,
+                scrollTop: scrollTop
             });
 
             delete this.groupedRows;
+        }else{
+            if(!props.groupBy && this.state.groupBy){
+                this.setState({
+                    ... this.state,
+                   
+                    startIndex: 0,
+                    scrollLeft: 0,
+                    scrollTop: 0
+                });
+            }
         }
     },
 
