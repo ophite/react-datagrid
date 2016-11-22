@@ -1272,7 +1272,6 @@ html.u-app body * {
 }
 .react-datagrid .z-row {
   border-bottom: 1px solid #f2f2f2;
-  height: auto !important;
 }
 .react-datagrid .z-row.z-over,
 .react-datagrid .z-row.z-over.z-odd {
