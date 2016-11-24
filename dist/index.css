@@ -1304,8 +1304,8 @@ html.u-app body * {
   content: '+';
   font-size: 20px;
   position: absolute;
-  right: 20px;
-  top: calc(50% - 10px);
+  left: 13px;
+  top: calc(50% - 13px);
 }
 .react-datagrid .z-group-row.open:before {
   content: '–';
@@ -1319,6 +1319,9 @@ html.u-app body * {
   -ms-box-flex: 1;
   -ms-flex: 1;
   flex: 1;
+}
+.react-datagrid .z-group-cell .z-content {
+  padding-left: 35px !important;
 }
 .react-datagrid.z-cell-borders-horizontal .z-cell:not(.z-column-header) {
   border-bottom: 1px dotted rgba(0,0,0,0.12);
